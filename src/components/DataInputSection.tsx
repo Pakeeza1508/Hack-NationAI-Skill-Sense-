@@ -17,6 +17,7 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [linkedinUrl, setLinkedinUrl] = useState("");
   const [githubUrl, setGithubUrl] = useState("");
+  const [githubData, setGithubData] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
 
@@ -91,11 +92,40 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
     setIsProcessing(true);
     
     try {
+      let githubInfo = githubData;
+
+      // Fetch GitHub data if URL is provided and not already fetched
+      if (githubUrl && !githubData) {
+        try {
+          const { data: fetchedGithubData, error: githubError } = await supabase.functions.invoke('fetch-github', {
+            body: { githubUrl },
+          });
+
+          if (githubError) throw githubError;
+          
+          githubInfo = fetchedGithubData;
+          setGithubData(fetchedGithubData);
+          
+          toast({
+            title: "GitHub Data Fetched",
+            description: "Successfully retrieved GitHub profile and repository data.",
+          });
+        } catch (githubError: any) {
+          console.warn("GitHub fetch warning:", githubError);
+          toast({
+            title: "GitHub Fetch Note",
+            description: "Continuing with URL reference only. Some GitHub data may not be available.",
+            variant: "default",
+          });
+        }
+      }
+
       const { data, error } = await supabase.functions.invoke('extract-skills', {
         body: {
           cvText,
           linkedinUrl,
           githubUrl,
+          githubData: githubInfo,
         },
       });
 
@@ -140,13 +170,13 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
                   <Input
                     id="cv-file"
                     type="file"
-                    accept=".txt,.pdf"
+                    accept=".txt,.pdf,.docx"
                     onChange={handleFileUpload}
                     disabled={isProcessing}
                     className="cursor-pointer"
                   />
                   <p className="text-sm text-muted-foreground mt-1">
-                    Upload a PDF or text file (max 10MB)
+                    Upload a PDF, Word document (.docx), or text file (max 10MB)
                   </p>
                 </div>
               </div>

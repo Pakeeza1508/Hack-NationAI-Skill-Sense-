@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { cvText, linkedinUrl, githubUrl } = await req.json();
+    const { cvText, linkedinUrl, githubUrl, githubData } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     
     if (!LOVABLE_API_KEY) {
@@ -19,7 +19,7 @@ serve(async (req) => {
     }
 
     // Build the prompt for skill extraction
-    const prompt = buildExtractionPrompt(cvText, linkedinUrl, githubUrl);
+    const prompt = buildExtractionPrompt(cvText, linkedinUrl, githubUrl, githubData);
 
     console.log('Extracting skills using Lovable AI...');
 
@@ -99,7 +99,7 @@ Guidelines:
   }
 });
 
-function buildExtractionPrompt(cvText: string, linkedinUrl: string, githubUrl: string): string {
+function buildExtractionPrompt(cvText: string, linkedinUrl: string, githubUrl: string, githubData?: any): string {
   let prompt = 'Analyze the following career data and extract comprehensive skill profile:\n\n';
   
   if (cvText) {
@@ -110,7 +110,40 @@ function buildExtractionPrompt(cvText: string, linkedinUrl: string, githubUrl: s
     prompt += `LinkedIn Profile: ${linkedinUrl}\n(Note: Analyze based on typical LinkedIn profile structure - experience, skills, endorsements, recommendations)\n\n`;
   }
   
-  if (githubUrl) {
+  if (githubUrl && githubData) {
+    prompt += `GitHub Profile Analysis:\n`;
+    prompt += `Username: ${githubData.profile.username}\n`;
+    if (githubData.profile.bio) prompt += `Bio: ${githubData.profile.bio}\n`;
+    prompt += `Public Repositories: ${githubData.profile.publicRepos}\n`;
+    prompt += `Total Stars Received: ${githubData.statistics.totalStars}\n`;
+    prompt += `Total Forks: ${githubData.statistics.totalForks}\n\n`;
+    
+    if (githubData.statistics.topLanguages.length > 0) {
+      prompt += `Programming Languages (by repository count):\n`;
+      githubData.statistics.topLanguages.forEach((lang: any) => {
+        prompt += `- ${lang.language}: ${lang.repoCount} repositories\n`;
+      });
+      prompt += '\n';
+    }
+    
+    if (githubData.statistics.topTopics.length > 0) {
+      prompt += `Repository Topics:\n`;
+      githubData.statistics.topTopics.forEach((topic: any) => {
+        prompt += `- ${topic.topic} (${topic.count} repos)\n`;
+      });
+      prompt += '\n';
+    }
+    
+    if (githubData.notableRepos.length > 0) {
+      prompt += `Notable Projects:\n`;
+      githubData.notableRepos.forEach((repo: any) => {
+        prompt += `- ${repo.name}`;
+        if (repo.description) prompt += `: ${repo.description}`;
+        prompt += ` (${repo.language || 'Multiple languages'}, ${repo.stars} stars)\n`;
+      });
+      prompt += '\n';
+    }
+  } else if (githubUrl) {
     prompt += `GitHub Profile: ${githubUrl}\n(Note: Consider repository languages, project descriptions, contribution patterns)\n\n`;
   }
   

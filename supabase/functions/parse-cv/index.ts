@@ -3,6 +3,9 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 // Use ESM module for PDF parsing
 const pdfParse = (await import("https://esm.sh/pdf-parse@1.1.1")).default;
 
+// Import DOCX parsing library
+const mammoth = (await import("https://esm.sh/mammoth@1.6.0")).default;
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -55,11 +58,18 @@ serve(async (req) => {
       file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
       file.name.endsWith('.docx')
     ) {
-      // For now, ask users to convert to PDF or text
-      throw new Error('Word documents are not yet supported. Please convert to PDF or upload as text.');
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        extractedText = result.value;
+        console.log('DOCX parsed successfully, extracted', extractedText.length, 'characters');
+      } catch (docxError) {
+        console.error('DOCX parsing error:', docxError);
+        throw new Error('Failed to parse Word document. Please ensure it is a valid DOCX file.');
+      }
     }
     else {
-      throw new Error('Unsupported file type. Please upload a PDF or text file.');
+      throw new Error('Unsupported file type. Please upload a PDF, DOCX, or text file.');
     }
 
     if (!extractedText || extractedText.trim().length === 0) {
