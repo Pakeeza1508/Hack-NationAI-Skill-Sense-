@@ -14,7 +14,156 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      skill_profiles: {
+        Row: {
+          created_at: string | null
+          data_sources: string[] | null
+          id: string
+          profile_data: Json
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          data_sources?: string[] | null
+          id?: string
+          profile_data: Json
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          data_sources?: string[] | null
+          id?: string
+          profile_data?: Json
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      skill_timeline: {
+        Row: {
+          category: string
+          created_at: string | null
+          first_observed_date: string | null
+          id: string
+          last_observed_date: string | null
+          milestones: Json | null
+          skill_name: string
+          user_id: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          first_observed_date?: string | null
+          id?: string
+          last_observed_date?: string | null
+          milestones?: Json | null
+          skill_name: string
+          user_id?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          first_observed_date?: string | null
+          id?: string
+          last_observed_date?: string | null
+          milestones?: Json | null
+          skill_name?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_timeline_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      validated_skills: {
+        Row: {
+          category: string
+          edited_confidence: number | null
+          edited_evidence: Json | null
+          id: string
+          original_confidence: number | null
+          original_evidence: Json | null
+          skill_name: string
+          status: string
+          user_feedback: string | null
+          user_id: string | null
+          validated_at: string | null
+        }
+        Insert: {
+          category: string
+          edited_confidence?: number | null
+          edited_evidence?: Json | null
+          id?: string
+          original_confidence?: number | null
+          original_evidence?: Json | null
+          skill_name: string
+          status: string
+          user_feedback?: string | null
+          user_id?: string | null
+          validated_at?: string | null
+        }
+        Update: {
+          category?: string
+          edited_confidence?: number | null
+          edited_evidence?: Json | null
+          id?: string
+          original_confidence?: number | null
+          original_evidence?: Json | null
+          skill_name?: string
+          status?: string
+          user_feedback?: string | null
+          user_id?: string | null
+          validated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "validated_skills_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
