@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Brain, TrendingUp, FileText } from "lucide-react";
 import { DataInputSection } from "@/components/DataInputSection";
@@ -7,6 +7,14 @@ import { SkillProfileDisplay } from "@/components/SkillProfileDisplay";
 const Index = () => {
   const [showInput, setShowInput] = useState(false);
   const [skillProfile, setSkillProfile] = useState<any>(null);
+  const inputSectionRef = useRef<HTMLDivElement>(null);
+
+  const handleAnalyzeClick = () => {
+    setShowInput(true);
+    setTimeout(() => {
+      inputSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -36,7 +44,7 @@ const Index = () => {
               <Button 
                 size="lg" 
                 className="text-lg px-8"
-                onClick={() => setShowInput(true)}
+                onClick={handleAnalyzeClick}
               >
                 <Brain className="mr-2 h-5 w-5" />
                 Analyze Your Skills
@@ -75,7 +83,9 @@ const Index = () => {
 
       {/* Data Input Section */}
       {showInput && !skillProfile && (
-        <DataInputSection onProfileGenerated={setSkillProfile} />
+        <div ref={inputSectionRef}>
+          <DataInputSection onProfileGenerated={setSkillProfile} />
+        </div>
       )}
 
       {/* Skill Profile Display */}
