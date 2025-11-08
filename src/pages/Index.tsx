@@ -1,6 +1,6 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Brain, TrendingUp, FileText } from "lucide-react";
+import { Sparkles, Brain, TrendingUp, FileText, ArrowUp, ChevronDown } from "lucide-react";
 import { DataInputSection } from "@/components/DataInputSection";
 import { SkillProfileDisplay } from "@/components/SkillProfileDisplay";
 import { useNavigate } from "react-router-dom";
@@ -8,8 +8,19 @@ import { useNavigate } from "react-router-dom";
 const Index = () => {
   const [showInput, setShowInput] = useState(false);
   const [skillProfile, setSkillProfile] = useState<any>(null);
+  const [showBackToTop, setShowBackToTop] = useState(false);
   const inputSectionRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const featuresRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleAnalyzeClick = () => {
     console.log('Analyze button clicked');
@@ -21,7 +32,6 @@ const Index = () => {
 
   const handleViewDemo = () => {
     console.log('View Demo button clicked');
-    // Create sample demo profile
     const demoProfile = {
       name: "Demo User",
       title: "Software Engineer",
@@ -55,6 +65,14 @@ const Index = () => {
     navigate('/dashboard');
   };
 
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
+    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header Navigation */}
@@ -74,9 +92,9 @@ const Index = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden pointer-events-auto">
+      <section ref={heroRef} className="relative overflow-hidden pointer-events-auto min-h-[calc(100vh-80px)] flex items-center">
         <div className="absolute inset-0 bg-gradient-hero opacity-5 pointer-events-none" />
-        <div className="container mx-auto px-4 py-20 md:py-32">
+        <div className="container mx-auto px-4 py-20 md:py-32 relative z-10 w-full">
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-sm text-primary font-medium">
               <Sparkles className="w-4 h-4" />
@@ -119,12 +137,22 @@ const Index = () => {
                 View Demo
               </button>
             </div>
+
+            {/* Scroll Down Indicator */}
+            <button
+              onClick={() => scrollToSection(featuresRef)}
+              className="mt-12 mx-auto flex flex-col items-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
+              aria-label="Scroll to features"
+            >
+              <span className="text-sm font-medium">Learn More</span>
+              <ChevronDown className="w-6 h-6 animate-bounce" />
+            </button>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-gradient-card">
+      <section ref={featuresRef} className="py-20 bg-gradient-card scroll-mt-20">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             <FeatureCard
@@ -163,6 +191,17 @@ const Index = () => {
           }}
         />
       )}
+
+      {/* Back to Top Button */}
+      {showBackToTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-8 right-8 z-50 p-3 bg-primary text-primary-foreground rounded-full shadow-lg hover:bg-primary/90 transition-all duration-300 hover:scale-110"
+          aria-label="Back to top"
+        >
+          <ArrowUp className="w-6 h-6" />
+        </button>
+      )}
     </div>
   );
 };
@@ -176,10 +215,12 @@ const FeatureCard = ({
   title: string; 
   description: string; 
 }) => (
-  <div className="p-6 rounded-2xl bg-card shadow-card hover:shadow-card-hover transition-all duration-300 border border-border">
-    <div className="mb-4">{icon}</div>
-    <h3 className="text-xl font-semibold mb-2">{title}</h3>
-    <p className="text-muted-foreground">{description}</p>
+  <div className="p-8 rounded-2xl bg-card shadow-card hover:shadow-card-hover transition-all duration-300 border border-border h-full flex flex-col">
+    <div className="mb-6 flex items-center justify-center w-16 h-16 bg-primary/10 rounded-xl">
+      {icon}
+    </div>
+    <h3 className="text-xl font-semibold mb-3">{title}</h3>
+    <p className="text-muted-foreground leading-relaxed">{description}</p>
   </div>
 );
 
