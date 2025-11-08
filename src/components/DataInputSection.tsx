@@ -14,10 +14,47 @@ interface DataInputSectionProps {
 
 export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) => {
   const [cvText, setCvText] = useState("");
+  const [cvFile, setCvFile] = useState<File | null>(null);
   const [linkedinUrl, setLinkedinUrl] = useState("");
   const [githubUrl, setGithubUrl] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "Please upload a file smaller than 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setCvFile(file);
+
+    // Read file content
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      setCvText(text);
+      toast({
+        title: "File Uploaded",
+        description: `${file.name} loaded successfully.`,
+      });
+    };
+    reader.onerror = () => {
+      toast({
+        title: "Upload Failed",
+        description: "Failed to read file. Please try again.",
+        variant: "destructive",
+      });
+    };
+    reader.readAsText(file);
+  };
 
   const handleAnalyze = async () => {
     if (!cvText && !linkedinUrl && !githubUrl) {
@@ -74,6 +111,33 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
 
             <div className="space-y-4">
               <div>
+                <Label htmlFor="cv-file" className="text-base font-semibold">
+                  Upload CV / Resume
+                </Label>
+                <div className="mt-2">
+                  <Input
+                    id="cv-file"
+                    type="file"
+                    accept=".txt,.pdf,.doc,.docx"
+                    onChange={handleFileUpload}
+                    className="cursor-pointer"
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Upload a text, PDF, or Word document (max 5MB)
+                  </p>
+                </div>
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">Or paste text</span>
+                </div>
+              </div>
+
+              <div>
                 <Label htmlFor="cv-text" className="text-base font-semibold">
                   CV / Resume Text
                 </Label>
@@ -88,7 +152,7 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
 
               <div>
                 <Label htmlFor="linkedin-url" className="text-base font-semibold">
-                  LinkedIn Profile URL
+                  LinkedIn Profile URL (Optional)
                 </Label>
                 <Input
                   id="linkedin-url"
@@ -98,11 +162,14 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
                   onChange={(e) => setLinkedinUrl(e.target.value)}
                   className="mt-2"
                 />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Provide your LinkedIn URL for additional context
+                </p>
               </div>
 
               <div>
                 <Label htmlFor="github-url" className="text-base font-semibold">
-                  GitHub Profile URL
+                  GitHub Profile URL (Optional)
                 </Label>
                 <Input
                   id="github-url"
@@ -112,6 +179,9 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
                   onChange={(e) => setGithubUrl(e.target.value)}
                   className="mt-2"
                 />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Provide your GitHub URL for technical skill analysis
+                </p>
               </div>
             </div>
 
