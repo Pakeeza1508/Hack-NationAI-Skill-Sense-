@@ -12,6 +12,7 @@ const Index = () => {
   const navigate = useNavigate();
 
   const handleAnalyzeClick = () => {
+    console.log('Analyze button clicked');
     setShowInput(true);
     setTimeout(() => {
       inputSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -19,6 +20,7 @@ const Index = () => {
   };
 
   const handleViewDemo = () => {
+    console.log('View Demo button clicked');
     // Create sample demo profile
     const demoProfile = {
       name: "Demo User",
@@ -95,6 +97,7 @@ const Index = () => {
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
+                type="button"
                 size="lg" 
                 className="text-lg px-8"
                 onClick={handleAnalyzeClick}
@@ -103,6 +106,7 @@ const Index = () => {
                 Analyze Your Skills
               </Button>
               <Button 
+                type="button"
                 size="lg" 
                 variant="outline" 
                 className="text-lg px-8"
