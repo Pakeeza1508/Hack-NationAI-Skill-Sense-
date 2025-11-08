@@ -3,17 +3,30 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, Brain, TrendingUp, FileText } from "lucide-react";
 import { DataInputSection } from "@/components/DataInputSection";
 import { SkillProfileDisplay } from "@/components/SkillProfileDisplay";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const [showInput, setShowInput] = useState(false);
   const [skillProfile, setSkillProfile] = useState<any>(null);
   const inputSectionRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const handleAnalyzeClick = () => {
     setShowInput(true);
     setTimeout(() => {
       inputSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
+  };
+
+  const handleViewDemo = () => {
+    // Check if there's a saved profile in localStorage
+    const savedProfile = localStorage.getItem('skillProfile');
+    if (savedProfile) {
+      navigate('/dashboard');
+    } else {
+      // Show the input form
+      handleAnalyzeClick();
+    }
   };
 
   return (
@@ -49,7 +62,12 @@ const Index = () => {
                 <Brain className="mr-2 h-5 w-5" />
                 Analyze Your Skills
               </Button>
-              <Button size="lg" variant="outline" className="text-lg px-8">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="text-lg px-8"
+                onClick={handleViewDemo}
+              >
                 <FileText className="mr-2 h-5 w-5" />
                 View Demo
               </Button>
