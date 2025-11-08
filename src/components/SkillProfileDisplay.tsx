@@ -2,9 +2,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Download, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { ExportOptions } from "./ExportOptions";
 
 interface SkillProfileDisplayProps {
   profile: any;
@@ -14,16 +15,6 @@ interface SkillProfileDisplayProps {
 export const SkillProfileDisplay = ({ profile, onReset }: SkillProfileDisplayProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  const handleExport = () => {
-    const dataStr = JSON.stringify(profile, null, 2);
-    const dataBlob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "skill-profile.json";
-    link.click();
-  };
 
   const handleViewDashboard = () => {
     // Save profile to localStorage for dashboard
@@ -56,10 +47,7 @@ export const SkillProfileDisplay = ({ profile, onReset }: SkillProfileDisplayPro
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <h2 className="text-3xl font-bold">Your Skill Profile</h2>
           <div className="flex gap-3">
-            <Button variant="outline" onClick={handleExport}>
-              <Download className="mr-2 h-4 w-4" />
-              Export
-            </Button>
+            <ExportOptions profile={profile} />
             <Button onClick={handleViewDashboard}>
               View Dashboard
             </Button>
