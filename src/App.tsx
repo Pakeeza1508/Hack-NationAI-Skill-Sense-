@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppLayout } from "./components/AppLayout";
 import Index from "./pages/Index";
+import Analyze from "./pages/Analyze";
 import Dashboard from "./pages/Dashboard";
 import SkillProfile from "./pages/SkillProfile";
 import GapAnalysis from "./pages/GapAnalysis";
@@ -22,6 +23,9 @@ const App = () => (
         <Routes>
           {/* Home page without sidebar */}
           <Route path="/" element={<Index />} />
+          
+          {/* Analyze page without sidebar */}
+          <Route path="/analyze" element={<Analyze />} />
           
           {/* All other pages with sidebar layout */}
           <Route path="/dashboard" element={<AppLayout><Dashboard /></AppLayout>} />

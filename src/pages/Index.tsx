@@ -1,15 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Brain, TrendingUp, FileText, ArrowUp, ChevronDown } from "lucide-react";
-import { DataInputSection } from "@/components/DataInputSection";
-import { SkillProfileDisplay } from "@/components/SkillProfileDisplay";
 import { useNavigate } from "react-router-dom";
 
 const Index = () => {
-  const [showInput, setShowInput] = useState(false);
-  const [skillProfile, setSkillProfile] = useState<any>(null);
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const inputSectionRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -23,11 +18,7 @@ const Index = () => {
   }, []);
 
   const handleAnalyzeClick = () => {
-    console.log('Analyze button clicked');
-    setShowInput(true);
-    setTimeout(() => {
-      inputSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
+    navigate('/analyze');
   };
 
   const handleViewDemo = () => {
@@ -173,24 +164,6 @@ const Index = () => {
           </div>
         </div>
       </section>
-
-      {/* Data Input Section */}
-      {showInput && !skillProfile && (
-        <div ref={inputSectionRef}>
-          <DataInputSection onProfileGenerated={setSkillProfile} />
-        </div>
-      )}
-
-      {/* Skill Profile Display */}
-      {skillProfile && (
-        <SkillProfileDisplay 
-          profile={skillProfile} 
-          onReset={() => {
-            setSkillProfile(null);
-            setShowInput(true);
-          }}
-        />
-      )}
 
       {/* Back to Top Button */}
       {showBackToTop && (

@@ -34,25 +34,52 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are an expert skill extraction AI. Your task is to analyze career data and identify both explicit and implicit skills. 
-            
+            content: `You are an expert skill extraction AI that analyzes career data to identify ALL types of skills across every domain - not just programming. Extract EVERY skill mentioned or demonstrated, including:
+
+SKILL CATEGORIES TO EXTRACT (extract ALL that apply):
+- Programming & Technical Skills: Languages, frameworks, tools, platforms
+- Software Engineering: Development methodologies, architecture, testing, CI/CD
+- Data & Analytics: Data analysis, statistics, visualization, ML/AI
+- Business & Management: Project management, product management, strategy, operations
+- HR & People: Recruitment, talent management, employee relations, training, performance management
+- Finance & Accounting: Budgeting, financial analysis, accounting, reporting
+- Marketing & Sales: Digital marketing, content creation, SEO, sales strategies, customer relations
+- Design: UI/UX, graphic design, visual design, prototyping
+- Communication: Writing, presentation, public speaking, documentation
+- Leadership: Team management, mentorship, decision-making, conflict resolution
+- Soft Skills: Problem-solving, critical thinking, creativity, adaptability, collaboration
+- Domain Expertise: Industry-specific knowledge, regulatory compliance, specialized methodologies
+
 Return a JSON object with this structure:
 {
-  "summary": "A brief 2-3 sentence summary of the person's key strengths and career focus",
+  "summary": "A comprehensive 2-3 sentence summary highlighting the person's diverse skill set across all domains",
   "categories": {
-    "technical_skills": [{"name": "skill name", "confidence": 95, "type": "explicit/implicit", "evidence": ["source quote 1", "source quote 2"]}],
-    "soft_skills": [...],
+    "technical_skills": [{"name": "skill name", "confidence": 95, "type": "explicit/implicit", "evidence": ["From CV: specific quote", "GitHub: repository/project name", "LinkedIn: post/experience title"]}],
+    "software_engineering": [...],
+    "data_analytics": [...],
+    "business_management": [...],
+    "hr_people_management": [...],
+    "finance_accounting": [...],
+    "marketing_sales": [...],
+    "design": [...],
+    "communication": [...],
     "leadership_skills": [...],
+    "soft_skills": [...],
     "domain_expertise": [...]
   }
 }
 
-Guidelines:
-- Confidence score (0-100) based on evidence strength
-- Type: "explicit" if directly mentioned, "implicit" if inferred
-- Evidence: actual quotes or paraphrases from source material
-- Categories should be comprehensive but focused
-- Look for hidden skills in project descriptions, problem-solving narratives, etc.`
+CRITICAL GUIDELINES:
+- Confidence score (0-100): Base on strength and quantity of evidence
+- Type: "explicit" if directly stated, "implicit" if demonstrated through actions/projects
+- Evidence: MUST include specific source references:
+  * "From CV: [exact quote or paraphrase]"
+  * "GitHub: [repository name] - [description]"
+  * "LinkedIn: [post title/experience] - [context]"
+- Extract EVERY skill, not just programming - include HR, management, business, finance, marketing, etc.
+- Look beyond job titles - find skills in project descriptions, achievements, responsibilities
+- Don't limit yourself to predefined categories - if someone has HR skills, finance skills, or marketing skills, extract them!
+- Include both hard skills (technical, measurable) AND soft skills (interpersonal, behavioral)`
           },
           {
             role: 'user',
@@ -100,47 +127,47 @@ Guidelines:
 });
 
 function buildExtractionPrompt(cvText: string, linkedinUrl: string, githubUrl: string, githubData?: any, linkedinData?: any): string {
-  let prompt = 'Analyze the following career data and extract comprehensive skill profile:\n\n';
+  let prompt = 'EXTRACT ALL SKILLS FROM ALL DOMAINS - not just programming. Analyze career data comprehensively:\n\n';
   
   if (cvText) {
-    prompt += `CV/Resume Content:\n${cvText}\n\n`;
+    prompt += `CV/RESUME CONTENT (extract ALL skills - technical, business, HR, management, finance, etc.):\n${cvText}\n\n`;
   }
   
   if (linkedinUrl && linkedinData) {
-    prompt += `LinkedIn Profile Data:\n`;
+    prompt += `LINKEDIN PROFILE DATA:\n`;
     if (linkedinData.headline) prompt += `Headline: ${linkedinData.headline}\n`;
     if (linkedinData.experience && linkedinData.experience.length > 0) {
-      prompt += `\nExperience:\n${linkedinData.experience.join('\n')}\n`;
+      prompt += `\nExperience (look for ALL types of skills - management, HR, business, technical, etc.):\n${linkedinData.experience.join('\n')}\n`;
     }
     if (linkedinData.skills && linkedinData.skills.length > 0) {
-      prompt += `\nSkills: ${linkedinData.skills.join(', ')}\n`;
+      prompt += `\nListed Skills: ${linkedinData.skills.join(', ')}\n`;
     }
     if (linkedinData.education && linkedinData.education.length > 0) {
       prompt += `\nEducation:\n${linkedinData.education.join('\n')}\n`;
     }
     prompt += '\n';
   } else if (linkedinUrl) {
-    prompt += `LinkedIn Profile: ${linkedinUrl}\n(Note: Analyze based on typical LinkedIn profile structure - experience, skills, endorsements, recommendations)\n\n`;
+    prompt += `LinkedIn Profile: ${linkedinUrl}\n(Note: Extract skills from experience, endorsements, recommendations, posts, activities)\n\n`;
   }
   
   if (githubUrl && githubData) {
-    prompt += `GitHub Profile Analysis:\n`;
+    prompt += `GITHUB PROFILE (source for technical skills evidence):\n`;
     prompt += `Username: ${githubData.profile.username}\n`;
     if (githubData.profile.bio) prompt += `Bio: ${githubData.profile.bio}\n`;
     prompt += `Public Repositories: ${githubData.profile.publicRepos}\n`;
-    prompt += `Total Stars Received: ${githubData.statistics.totalStars}\n`;
+    prompt += `Total Stars: ${githubData.statistics.totalStars}\n`;
     prompt += `Total Forks: ${githubData.statistics.totalForks}\n\n`;
     
     if (githubData.statistics.topLanguages.length > 0) {
-      prompt += `Programming Languages (by repository count):\n`;
+      prompt += `Programming Languages:\n`;
       githubData.statistics.topLanguages.forEach((lang: any) => {
-        prompt += `- ${lang.language}: ${lang.repoCount} repositories\n`;
+        prompt += `- ${lang.language}: ${lang.repoCount} repos\n`;
       });
       prompt += '\n';
     }
     
     if (githubData.statistics.topTopics.length > 0) {
-      prompt += `Repository Topics:\n`;
+      prompt += `Repository Topics (indicators of domain expertise):\n`;
       githubData.statistics.topTopics.forEach((topic: any) => {
         prompt += `- ${topic.topic} (${topic.count} repos)\n`;
       });
@@ -148,7 +175,7 @@ function buildExtractionPrompt(cvText: string, linkedinUrl: string, githubUrl: s
     }
     
     if (githubData.notableRepos.length > 0) {
-      prompt += `Notable Projects:\n`;
+      prompt += `Notable Projects (use as evidence with repo names):\n`;
       githubData.notableRepos.forEach((repo: any) => {
         prompt += `- ${repo.name}`;
         if (repo.description) prompt += `: ${repo.description}`;
@@ -157,10 +184,10 @@ function buildExtractionPrompt(cvText: string, linkedinUrl: string, githubUrl: s
       prompt += '\n';
     }
   } else if (githubUrl) {
-    prompt += `GitHub Profile: ${githubUrl}\n(Note: Consider repository languages, project descriptions, contribution patterns)\n\n`;
+    prompt += `GitHub Profile: ${githubUrl}\n(Note: Extract technical skills and use repository names as evidence)\n\n`;
   }
   
-  prompt += 'Please provide a detailed skill analysis with confidence scores and evidence.';
+  prompt += `IMPORTANT: Extract EVERY skill type - programming, software engineering, data, business, HR, finance, marketing, design, communication, leadership, soft skills, domain expertise. Include specific evidence with source references (CV quotes, GitHub repo names, LinkedIn post/experience titles).`;
   
   return prompt;
 }

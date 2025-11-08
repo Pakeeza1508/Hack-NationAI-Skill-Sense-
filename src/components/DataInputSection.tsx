@@ -216,7 +216,18 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
 
       if (error) throw error;
 
-      onProfileGenerated(data);
+      // Add data sources metadata
+      const dataSources = [];
+      if (cvText || cvFile) dataSources.push('cv');
+      if (linkedinUrl) dataSources.push('linkedin');
+      if (githubUrl) dataSources.push('github');
+
+      const enrichedData = {
+        ...data,
+        dataSources,
+      };
+
+      onProfileGenerated(enrichedData);
       
       toast({
         title: "Analysis Complete!",
