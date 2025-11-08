@@ -2,7 +2,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Download, RefreshCw, Edit } from "lucide-react";
+import { Download, RefreshCw } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface SkillProfileDisplayProps {
   profile: any;
@@ -10,6 +12,9 @@ interface SkillProfileDisplayProps {
 }
 
 export const SkillProfileDisplay = ({ profile, onReset }: SkillProfileDisplayProps) => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
   const handleExport = () => {
     const dataStr = JSON.stringify(profile, null, 2);
     const dataBlob = new Blob([dataStr], { type: "application/json" });
@@ -20,15 +25,43 @@ export const SkillProfileDisplay = ({ profile, onReset }: SkillProfileDisplayPro
     link.click();
   };
 
+  const handleViewDashboard = () => {
+    // Save profile to localStorage for dashboard
+    const savedProfile = {
+      ...profile,
+      name: "User",
+      completeness: 85,
+      topSkills: Object.values(profile.categories || {})
+        .flat()
+        .sort((a: any, b: any) => b.confidence - a.confidence)
+        .slice(0, 5),
+      dataSources: ['cv'],
+      recentActivity: [
+        { title: "Skills analyzed successfully", date: new Date().toLocaleDateString() }
+      ]
+    };
+    localStorage.setItem('skillProfile', JSON.stringify(savedProfile));
+    
+    toast({
+      title: "Profile Saved!",
+      description: "Redirecting to your dashboard...",
+    });
+    
+    setTimeout(() => navigate('/dashboard'), 1000);
+  };
+
   return (
     <section className="py-20 bg-gradient-card">
       <div className="container mx-auto px-4 max-w-6xl">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <h2 className="text-3xl font-bold">Your Skill Profile</h2>
           <div className="flex gap-3">
             <Button variant="outline" onClick={handleExport}>
               <Download className="mr-2 h-4 w-4" />
               Export
+            </Button>
+            <Button onClick={handleViewDashboard}>
+              View Dashboard
             </Button>
             <Button variant="outline" onClick={onReset}>
               <RefreshCw className="mr-2 h-4 w-4" />

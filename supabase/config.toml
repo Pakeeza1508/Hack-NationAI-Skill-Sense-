@@ -2,3 +2,6 @@ project_id = "mxdwwmxxhaanwcanybyi"
 
 [functions.extract-skills]
 verify_jwt = false
+
+[functions.analyze-gap]
+verify_jwt = false
