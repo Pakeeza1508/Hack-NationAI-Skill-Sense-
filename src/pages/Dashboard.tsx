@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Brain, TrendingUp, FileText, Target, Activity, Linkedin, Github, FileCode } from "lucide-react";
+import { Brain, TrendingUp, FileText, Target, Activity, Linkedin, Github, FileCode, Bell } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Dashboard = () => {
@@ -21,36 +21,98 @@ const Dashboard = () => {
   const recentActivity = profile?.recentActivity || [];
 
   return (
-    <div className="min-h-screen bg-gradient-card">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="min-h-screen bg-background">
+      {/* Header Bar */}
+      <header className="h-16 border-b border-border bg-card px-6 flex items-center justify-between">
+        <div className="flex-1">
+          <input
+            type="search"
+            placeholder="Search skills, insights..."
+            className="w-full max-w-md px-4 py-2 rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon">
+            <Bell className="h-5 w-5" />
+          </Button>
+          <div className="w-10 h-10 rounded-full bg-gradient-hero flex items-center justify-center text-white font-bold">
+            {profile?.name?.[0] || "U"}
+          </div>
+        </div>
+      </header>
+
+      <div className="p-8 max-w-7xl mx-auto">
         {/* Welcome Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Welcome back! 👋</h1>
+          <h1 className="font-heading text-4xl font-bold mb-2">Welcome back, {profile?.name || "User"}!</h1>
           <p className="text-muted-foreground text-lg">
             Here's an overview of your skill profile and career insights
           </p>
         </div>
 
-        {/* Profile Summary Card */}
-        {profile && (
-          <Card className="p-6 mb-8 shadow-card">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-gradient-hero flex items-center justify-center text-white text-2xl font-bold">
-                  {profile.name?.[0] || "U"}
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold">{profile.name || "User"}</h2>
-                  <p className="text-muted-foreground">{profile.title || "Professional"}</p>
+        {/* Stats Row */}
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          {/* Profile Strength Card */}
+          <Card className="p-6 shadow-card">
+            <h3 className="font-heading text-lg font-semibold mb-4">Profile Strength</h3>
+            <div className="flex items-center gap-6">
+              <div className="relative w-24 h-24">
+                <svg className="w-24 h-24 transform -rotate-90">
+                  <circle
+                    cx="48"
+                    cy="48"
+                    r="40"
+                    stroke="currentColor"
+                    strokeWidth="8"
+                    fill="none"
+                    className="text-secondary"
+                  />
+                  <circle
+                    cx="48"
+                    cy="48"
+                    r="40"
+                    stroke="currentColor"
+                    strokeWidth="8"
+                    fill="none"
+                    strokeDasharray={`${2 * Math.PI * 40}`}
+                    strokeDashoffset={`${2 * Math.PI * 40 * (1 - (profile?.completeness || 75) / 100)}`}
+                    className="text-primary"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-2xl font-bold">{profile?.completeness || 75}%</span>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-sm text-muted-foreground mb-1">Profile Completeness</div>
-                <div className="text-3xl font-bold text-primary">{profile.completeness || 85}%</div>
+              <div>
+                <p className="text-sm text-muted-foreground mb-2">Add GitHub to improve →</p>
+                <Link to="/">
+                  <Button variant="outline" size="sm">Add Source</Button>
+                </Link>
               </div>
             </div>
           </Card>
-        )}
+
+          {/* Key Strengths */}
+          <Card className="p-6 shadow-card">
+            <h3 className="font-heading text-lg font-semibold mb-4">Key Strengths</h3>
+            <div className="space-y-3">
+              {(profile?.topSkills || []).slice(0, 3).map((skill: any, idx: number) => (
+                <div key={idx}>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="font-medium">{skill.name}</span>
+                    <span className="text-primary font-bold">{skill.confidence}%</span>
+                  </div>
+                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full"
+                      style={{ width: `${skill.confidence}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {/* Top Skills Widget */}

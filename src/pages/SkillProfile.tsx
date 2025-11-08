@@ -117,22 +117,23 @@ const SkillProfile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-card">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <h1 className="text-4xl font-bold mb-2">{profile.name || "Your Skill Profile"}</h1>
-              <p className="text-lg text-muted-foreground max-w-3xl">
-                {profile.summary}
-              </p>
-            </div>
-            <Button onClick={handleExport} variant="outline">
-              <Download className="mr-2 h-4 w-4" />
-              Export
-            </Button>
-          </div>
+    <div className="min-h-screen bg-background">
+      {/* Header Bar */}
+      <header className="h-16 border-b border-border bg-card px-6 flex items-center justify-between">
+        <h1 className="font-heading text-xl font-bold">Your Professional Skill Profile</h1>
+        <Button onClick={handleExport} variant="outline">
+          <Download className="mr-2 h-4 w-4" />
+          Export
+        </Button>
+      </header>
+
+      <div className="p-8 max-w-7xl mx-auto">
+        {/* Professional Summary */}
+        <div className="mb-6">
+          <p className="text-lg text-muted-foreground max-w-4xl">
+            {profile.summary || "A comprehensive overview of your professional skills extracted from multiple data sources."}
+          </p>
+        </div>
 
           {/* Data Sources */}
           <div className="flex items-center gap-4 mb-6">
@@ -157,7 +158,7 @@ const SkillProfile = () => {
           </div>
 
           {/* Filters and Search */}
-          <Card className="p-4 shadow-card">
+          <Card className="p-4 shadow-card mb-6">
             <div className="grid md:grid-cols-3 gap-4">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -193,7 +194,6 @@ const SkillProfile = () => {
               </Select>
             </div>
           </Card>
-        </div>
 
         {/* Skills Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

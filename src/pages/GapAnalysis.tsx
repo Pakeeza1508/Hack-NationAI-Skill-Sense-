@@ -65,15 +65,17 @@ const GapAnalysis = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-card">
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-            <Target className="w-10 h-10 text-primary" />
-            Skill Gap Analysis
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Compare your skills against a job description to identify matches and gaps
+    <div className="min-h-screen bg-background">
+      {/* Header Bar */}
+      <header className="h-16 border-b border-border bg-card px-6 flex items-center">
+        <h1 className="font-heading text-xl font-bold">Analyze Your Skill Gaps</h1>
+      </header>
+
+      <div className="p-8 max-w-6xl mx-auto">
+        <div className="mb-6">
+          <h2 className="font-heading text-2xl font-bold mb-2">Paste a job description below to get started:</h2>
+          <p className="text-muted-foreground">
+            Compare your skills against any job posting to identify matches and gaps
           </p>
         </div>
 
@@ -128,18 +130,18 @@ const GapAnalysis = () => {
               </p>
             </Card>
 
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-3 gap-6">
               {/* Matching Skills */}
-              <Card className="p-6 shadow-card">
-                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-500" />
-                  Matching Skills ({analysis.matches?.length || 0})
+              <Card className="p-6 shadow-card border-2 border-accent/20">
+                <h3 className="font-heading text-xl font-semibold mb-4 flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-accent" />
+                  ✅ Your Matching Skills
                 </h3>
+                <p className="text-xs text-muted-foreground mb-4">{analysis.matches?.length || 0} skills match</p>
                 <div className="space-y-2">
                   {analysis.matches?.map((skill: any, idx: number) => (
-                    <div key={idx} className="flex items-center justify-between p-3 bg-green-500/10 rounded-lg border border-green-500/20">
-                      <span className="font-medium">{skill.name}</span>
-                      <Badge className="bg-green-500">{skill.confidence}%</Badge>
+                    <div key={idx} className="p-2 rounded-lg bg-accent/10">
+                      <span className="font-medium text-sm">{skill.name}</span>
                     </div>
                   ))}
                   {(!analysis.matches || analysis.matches.length === 0) && (
@@ -149,53 +151,41 @@ const GapAnalysis = () => {
               </Card>
 
               {/* Skill Gaps */}
-              <Card className="p-6 shadow-card">
-                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <XCircle className="w-5 h-5 text-red-500" />
-                  Skills to Develop ({analysis.gaps?.length || 0})
+              <Card className="p-6 shadow-card border-2 border-warning/20">
+                <h3 className="font-heading text-xl font-semibold mb-4 flex items-center gap-2">
+                  <XCircle className="w-5 h-5 text-warning" />
+                  🔶 Skills to Develop
                 </h3>
+                <p className="text-xs text-muted-foreground mb-4">{analysis.gaps?.length || 0} gaps identified</p>
                 <div className="space-y-2">
                   {analysis.gaps?.map((skill: string, idx: number) => (
-                    <div key={idx} className="p-3 bg-red-500/10 rounded-lg border border-red-500/20">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium">{skill}</span>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="w-full text-xs"
-                        onClick={() => window.open(`https://www.google.com/search?q=${encodeURIComponent(skill + ' online courses')}`, '_blank')}
-                      >
-                        <ExternalLink className="mr-1 h-3 w-3" />
-                        Find Learning Resources
-                      </Button>
+                    <div key={idx} className="p-2 rounded-lg bg-warning/10">
+                      <span className="font-medium text-sm">{skill}</span>
                     </div>
                   ))}
                   {(!analysis.gaps || analysis.gaps.length === 0) && (
-                    <p className="text-sm text-muted-foreground">No gaps identified - you're fully qualified!</p>
+                    <p className="text-sm text-muted-foreground">No gaps - you're fully qualified!</p>
                   )}
                 </div>
               </Card>
 
               {/* Untapped Strengths */}
-              {analysis.untappedStrengths && analysis.untappedStrengths.length > 0 && (
-                <Card className="p-6 shadow-card md:col-span-2">
-                  <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-blue-500" />
-                    Your Untapped Strengths ({analysis.untappedStrengths.length})
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Skills you have that aren't required for this role - potential differentiators!
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {analysis.untappedStrengths.map((skill: string, idx: number) => (
-                      <Badge key={idx} variant="outline" className="bg-blue-500/10 border-blue-500/20">
-                        {skill}
-                      </Badge>
-                    ))}
-                  </div>
-                </Card>
-              )}
+              <Card className="p-6 shadow-card border-2 border-primary/20">
+                <h3 className="font-heading text-xl font-semibold mb-4 flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                  ✨ Your Extras
+                </h3>
+                <p className="text-xs text-muted-foreground mb-4">
+                  {analysis.untappedStrengths?.length || 0} bonus skills
+                </p>
+                <div className="space-y-2">
+                  {analysis.untappedStrengths?.map((skill: string, idx: number) => (
+                    <div key={idx} className="p-2 rounded-lg bg-primary/10">
+                      <span className="font-medium text-sm">{skill}</span>
+                    </div>
+                  ))}
+                </div>
+              </Card>
             </div>
 
             {/* Recommendations */}
