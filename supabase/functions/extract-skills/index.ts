@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { cvText, linkedinUrl, githubUrl, githubData } = await req.json();
+    const { cvText, linkedinUrl, githubUrl, githubData, linkedinData } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     
     if (!LOVABLE_API_KEY) {
@@ -19,7 +19,7 @@ serve(async (req) => {
     }
 
     // Build the prompt for skill extraction
-    const prompt = buildExtractionPrompt(cvText, linkedinUrl, githubUrl, githubData);
+    const prompt = buildExtractionPrompt(cvText, linkedinUrl, githubUrl, githubData, linkedinData);
 
     console.log('Extracting skills using Lovable AI...');
 
@@ -99,14 +99,27 @@ Guidelines:
   }
 });
 
-function buildExtractionPrompt(cvText: string, linkedinUrl: string, githubUrl: string, githubData?: any): string {
+function buildExtractionPrompt(cvText: string, linkedinUrl: string, githubUrl: string, githubData?: any, linkedinData?: any): string {
   let prompt = 'Analyze the following career data and extract comprehensive skill profile:\n\n';
   
   if (cvText) {
     prompt += `CV/Resume Content:\n${cvText}\n\n`;
   }
   
-  if (linkedinUrl) {
+  if (linkedinUrl && linkedinData) {
+    prompt += `LinkedIn Profile Data:\n`;
+    if (linkedinData.headline) prompt += `Headline: ${linkedinData.headline}\n`;
+    if (linkedinData.experience && linkedinData.experience.length > 0) {
+      prompt += `\nExperience:\n${linkedinData.experience.join('\n')}\n`;
+    }
+    if (linkedinData.skills && linkedinData.skills.length > 0) {
+      prompt += `\nSkills: ${linkedinData.skills.join(', ')}\n`;
+    }
+    if (linkedinData.education && linkedinData.education.length > 0) {
+      prompt += `\nEducation:\n${linkedinData.education.join('\n')}\n`;
+    }
+    prompt += '\n';
+  } else if (linkedinUrl) {
     prompt += `LinkedIn Profile: ${linkedinUrl}\n(Note: Analyze based on typical LinkedIn profile structure - experience, skills, endorsements, recommendations)\n\n`;
   }
   

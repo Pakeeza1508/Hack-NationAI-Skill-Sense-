@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.fetch-github]
 verify_jwt = false
+
+[functions.scrape-linkedin]
+verify_jwt = false
