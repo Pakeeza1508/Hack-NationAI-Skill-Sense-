@@ -19,14 +19,38 @@ const Index = () => {
   };
 
   const handleViewDemo = () => {
-    // Check if there's a saved profile in localStorage
-    const savedProfile = localStorage.getItem('skillProfile');
-    if (savedProfile) {
-      navigate('/dashboard');
-    } else {
-      // Show the input form
-      handleAnalyzeClick();
-    }
+    // Create sample demo profile
+    const demoProfile = {
+      name: "Demo User",
+      title: "Software Engineer",
+      summary: "An experienced professional with expertise in full-stack development, cloud technologies, and team leadership.",
+      completeness: 85,
+      categories: {
+        technical: [
+          { name: "Python", confidence: 95, type: "explicit", evidence: ["Led development of data processing pipeline"] },
+          { name: "JavaScript", confidence: 90, type: "explicit", evidence: ["Built React applications"] },
+          { name: "SQL", confidence: 85, type: "explicit", evidence: ["Database optimization projects"] }
+        ],
+        soft_skills: [
+          { name: "Leadership", confidence: 80, type: "implicit", evidence: ["Managed team of 5 developers"] },
+          { name: "Communication", confidence: 85, type: "implicit", evidence: ["Regular stakeholder presentations"] }
+        ]
+      },
+      topSkills: [
+        { name: "Python", confidence: 95 },
+        { name: "JavaScript", confidence: 90 },
+        { name: "SQL", confidence: 85 },
+        { name: "Leadership", confidence: 80 },
+        { name: "Communication", confidence: 85 }
+      ],
+      dataSources: ['cv', 'linkedin'],
+      recentActivity: [
+        { title: "Demo profile loaded", date: new Date().toLocaleDateString() }
+      ]
+    };
+    
+    localStorage.setItem('skillProfile', JSON.stringify(demoProfile));
+    navigate('/dashboard');
   };
 
   return (
