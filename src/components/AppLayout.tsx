@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, User, Target, Settings, Brain } from "lucide-react";
+import { Home, User, Target, Settings, Brain, TrendingUp } from "lucide-react";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -10,6 +10,7 @@ interface AppLayoutProps {
 const navItems = [
   { name: "Dashboard", path: "/dashboard", icon: Home },
   { name: "My Profile", path: "/profile", icon: User },
+  { name: "Timeline", path: "/timeline", icon: TrendingUp },
   { name: "Skill Gap", path: "/gap-analysis", icon: Target },
 ];
 

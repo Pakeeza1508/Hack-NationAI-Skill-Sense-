@@ -18,8 +18,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Download, Filter, ThumbsUp, Trash2, FileText, Linkedin, Github, Search } from "lucide-react";
+import { Download, Filter, FileText, Linkedin, Github, Search, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
+import { SkillValidation } from "@/components/SkillValidation";
 
 const SkillProfile = () => {
   const [profile, setProfile] = useState<any>(null);
@@ -121,10 +122,18 @@ const SkillProfile = () => {
       {/* Header Bar */}
       <header className="h-16 border-b border-border bg-card px-6 flex items-center justify-between">
         <h1 className="font-heading text-xl font-bold">Your Professional Skill Profile</h1>
-        <Button onClick={handleExport} variant="outline">
-          <Download className="mr-2 h-4 w-4" />
-          Export
-        </Button>
+        <div className="flex gap-2">
+          <Link to="/timeline">
+            <Button variant="outline">
+              <TrendingUp className="mr-2 h-4 w-4" />
+              Timeline
+            </Button>
+          </Link>
+          <Button onClick={handleExport} variant="outline">
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
+        </div>
       </header>
 
       <div className="p-8 max-w-7xl mx-auto">
@@ -206,24 +215,12 @@ const SkillProfile = () => {
                     {skill.category?.replace('_', ' ')}
                   </Badge>
                 </div>
-                <div className="flex gap-1">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleValidateSkill(skill.name)}
-                    className="h-8 w-8 p-0"
-                  >
-                    <ThumbsUp className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleRemoveSkill(skill.name)}
-                    className="h-8 w-8 p-0 text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+                <SkillValidation 
+                  skill={skill} 
+                  onValidated={() => {
+                    // Optionally reload or update UI after validation
+                  }}
+                />
               </div>
 
               <div className="mb-3">
