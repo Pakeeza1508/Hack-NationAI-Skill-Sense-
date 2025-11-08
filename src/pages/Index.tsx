@@ -55,6 +55,22 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Header Navigation */}
+      <header className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Brain className="w-8 h-8 text-primary" />
+            <span className="font-heading font-bold text-xl">SkillSense</span>
+          </div>
+          <Button
+            onClick={() => navigate('/dashboard')}
+            className="px-6"
+          >
+            Go to Dashboard
+          </Button>
+        </div>
+      </header>
+
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-hero opacity-5" />
