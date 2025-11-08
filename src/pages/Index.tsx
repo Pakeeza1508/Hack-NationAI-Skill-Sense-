@@ -74,8 +74,8 @@ const Index = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-hero opacity-5" />
+      <section className="relative overflow-hidden pointer-events-auto">
+        <div className="absolute inset-0 bg-gradient-hero opacity-5 pointer-events-none" />
         <div className="container mx-auto px-4 py-20 md:py-32">
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-sm text-primary font-medium">
@@ -95,26 +95,29 @@ const Index = () => {
               Uncover explicit and implicit capabilities you never knew you had.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
+            <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
+              <button
                 type="button"
-                size="lg" 
-                className="text-lg px-8"
-                onClick={handleAnalyzeClick}
+                className="inline-flex items-center justify-center gap-2 h-11 rounded-md px-8 text-lg font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                onClick={() => {
+                  console.log('Analyze button clicked - direct handler');
+                  handleAnalyzeClick();
+                }}
               >
                 <Brain className="mr-2 h-5 w-5" />
                 Analyze Your Skills
-              </Button>
-              <Button 
+              </button>
+              <button
                 type="button"
-                size="lg" 
-                variant="outline" 
-                className="text-lg px-8"
-                onClick={handleViewDemo}
+                className="inline-flex items-center justify-center gap-2 h-11 rounded-md px-8 text-lg font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
+                onClick={() => {
+                  console.log('View Demo button clicked - direct handler');
+                  handleViewDemo();
+                }}
               >
                 <FileText className="mr-2 h-5 w-5" />
                 View Demo
-              </Button>
+              </button>
             </div>
           </div>
         </div>
