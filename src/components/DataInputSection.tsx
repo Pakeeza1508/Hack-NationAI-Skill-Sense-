@@ -24,36 +24,58 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Check file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    // Check file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
       toast({
         title: "File Too Large",
-        description: "Please upload a file smaller than 5MB.",
+        description: "Please upload a file smaller than 10MB.",
         variant: "destructive",
       });
       return;
     }
 
     setCvFile(file);
+    setIsProcessing(true);
 
-    // Read file content
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = event.target?.result as string;
+    try {
+      // Create FormData to send file
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/parse-cv`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to parse file');
+      }
+
+      const { text } = await response.json();
       setCvText(text);
+      
       toast({
-        title: "File Uploaded",
-        description: `${file.name} loaded successfully.`,
+        title: "File Uploaded Successfully",
+        description: `${file.name} has been parsed and loaded.`,
       });
-    };
-    reader.onerror = () => {
+    } catch (error: any) {
+      console.error('File upload error:', error);
       toast({
         title: "Upload Failed",
-        description: "Failed to read file. Please try again.",
+        description: error.message || "Failed to parse file. Please try again.",
         variant: "destructive",
       });
-    };
-    reader.readAsText(file);
+      setCvFile(null);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleAnalyze = async () => {
@@ -118,12 +140,13 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
                   <Input
                     id="cv-file"
                     type="file"
-                    accept=".txt,.pdf,.doc,.docx"
+                    accept=".txt,.pdf"
                     onChange={handleFileUpload}
+                    disabled={isProcessing}
                     className="cursor-pointer"
                   />
                   <p className="text-sm text-muted-foreground mt-1">
-                    Upload a text, PDF, or Word document (max 5MB)
+                    Upload a PDF or text file (max 10MB)
                   </p>
                 </div>
               </div>
