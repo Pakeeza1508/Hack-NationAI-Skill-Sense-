@@ -1,7 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { NavLink } from "@/components/NavLink";
-import skillSenseLogo from "@/assets/skillsense-logo.png";
+import skillSenseLogo from "@/assets/skillsense-logo-new.png";
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -51,9 +51,9 @@ export const Header = () => {
           </NavLink>
         </nav>
 
-        {/* Right: Dashboard Button */}
-        <Button onClick={() => navigate('/dashboard')}>
-          Go to Dashboard
+        {/* Right: CTA Button */}
+        <Button onClick={() => navigate('/analyze')} variant="default">
+          Analyze Skills
         </Button>
       </div>
     </header>
