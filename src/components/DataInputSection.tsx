@@ -16,10 +16,9 @@ interface DataInputSectionProps {
 export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) => {
   const [cvText, setCvText] = useState("");
   const [cvFile, setCvFile] = useState<File | null>(null);
-  const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [linkedinText, setLinkedinText] = useState("");
   const [githubUrl, setGithubUrl] = useState("");
   const [githubData, setGithubData] = useState<any>(null);
-  const [linkedinData, setLinkedinData] = useState<any>(null);
   const [showGithubPreview, setShowGithubPreview] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isFetchingData, setIsFetchingData] = useState(false);
@@ -62,41 +61,6 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
     }
   };
 
-  const handleFetchLinkedInData = async () => {
-    if (!linkedinUrl) {
-      toast({
-        title: "LinkedIn URL Required",
-        description: "Please enter a LinkedIn profile URL first.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsFetchingData(true);
-    try {
-      const { data: fetchedLinkedInData, error: linkedinError } = await supabase.functions.invoke('scrape-linkedin', {
-        body: { linkedinUrl },
-      });
-
-      if (linkedinError) throw linkedinError;
-      
-      setLinkedinData(fetchedLinkedInData);
-      
-      toast({
-        title: "LinkedIn Data Fetched",
-        description: "Successfully scraped LinkedIn profile data.",
-      });
-    } catch (error: any) {
-      console.error("LinkedIn fetch error:", error);
-      toast({
-        title: "Failed to Fetch LinkedIn Data",
-        description: error.message || "Could not scrape LinkedIn data. This may be due to LinkedIn's privacy settings.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsFetchingData(false);
-    }
-  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -157,7 +121,7 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
   };
 
   const handleAnalyze = async () => {
-    if (!cvText && !linkedinUrl && !githubUrl) {
+    if (!cvText && !linkedinText && !githubUrl) {
       toast({
         title: "Input Required",
         description: "Please provide at least one data source to analyze.",
@@ -170,7 +134,6 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
     
     try {
       let githubInfo = githubData;
-      let linkedinInfo = linkedinData;
 
       // Fetch GitHub data if URL is provided and not already fetched
       if (githubUrl && !githubData) {
@@ -188,29 +151,12 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
         }
       }
 
-      // Fetch LinkedIn data if URL is provided and not already fetched
-      if (linkedinUrl && !linkedinData) {
-        try {
-          const { data: fetchedLinkedInData, error: linkedinError } = await supabase.functions.invoke('scrape-linkedin', {
-            body: { linkedinUrl },
-          });
-
-          if (!linkedinError) {
-            linkedinInfo = fetchedLinkedInData;
-            setLinkedinData(fetchedLinkedInData);
-          }
-        } catch (error) {
-          console.warn("LinkedIn fetch warning:", error);
-        }
-      }
-
       const { data, error } = await supabase.functions.invoke('extract-skills', {
         body: {
           cvText,
-          linkedinUrl,
+          linkedinText,
           githubUrl,
           githubData: githubInfo,
-          linkedinData: linkedinInfo,
         },
       });
 
@@ -219,7 +165,7 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
       // Add data sources metadata
       const dataSources = [];
       if (cvText || cvFile) dataSources.push('cv');
-      if (linkedinUrl) dataSources.push('linkedin');
+      if (linkedinText) dataSources.push('linkedin');
       if (githubUrl) dataSources.push('github');
 
       const enrichedData = {
@@ -300,42 +246,19 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
               </div>
 
               <div>
-                <Label htmlFor="linkedin-url" className="text-base font-semibold">
-                  LinkedIn Profile URL (Optional)
+                <Label htmlFor="linkedin-text" className="text-base font-semibold">
+                  LinkedIn Profile Information (Optional)
                 </Label>
-                <div className="flex gap-2 mt-2">
-                  <Input
-                    id="linkedin-url"
-                    type="url"
-                    placeholder="https://linkedin.com/in/yourprofile"
-                    value={linkedinUrl}
-                    onChange={(e) => setLinkedinUrl(e.target.value)}
-                    className="flex-1"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleFetchLinkedInData}
-                    disabled={isFetchingData || !linkedinUrl}
-                  >
-                    {isFetchingData ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
+                <Textarea
+                  id="linkedin-text"
+                  placeholder="Paste your LinkedIn profile content here (headline, about, experience, skills, etc.)..."
+                  value={linkedinText}
+                  onChange={(e) => setLinkedinText(e.target.value)}
+                  className="mt-2 min-h-[150px]"
+                />
                 <p className="text-sm text-muted-foreground mt-1">
-                  Click preview to scrape LinkedIn profile data
+                  Copy and paste your profile information from LinkedIn to enhance your skill analysis
                 </p>
-                {linkedinData && (
-                  <div className="mt-2 p-3 bg-muted rounded-lg text-sm">
-                    <p className="font-medium text-green-600">✓ LinkedIn data fetched</p>
-                    {linkedinData.headline && (
-                      <p className="text-muted-foreground mt-1">{linkedinData.headline}</p>
-                    )}
-                  </div>
-                )}
               </div>
 
               <div>

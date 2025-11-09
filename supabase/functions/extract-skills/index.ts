@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { cvText, linkedinUrl, githubUrl, githubData, linkedinData } = await req.json();
+    const { cvText, linkedinText, githubUrl, githubData } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     
     if (!LOVABLE_API_KEY) {
@@ -19,7 +19,7 @@ serve(async (req) => {
     }
 
     // Build the prompt for skill extraction
-    const prompt = buildExtractionPrompt(cvText, linkedinUrl, githubUrl, githubData, linkedinData);
+    const prompt = buildExtractionPrompt(cvText, linkedinText, githubUrl, githubData);
 
     console.log('Extracting skills using Lovable AI...');
 
@@ -108,28 +108,15 @@ CRITICAL INSTRUCTIONS:
   }
 });
 
-function buildExtractionPrompt(cvText: string, linkedinUrl: string, githubUrl: string, githubData?: any, linkedinData?: any): string {
+function buildExtractionPrompt(cvText: string, linkedinText: string, githubUrl: string, githubData?: any): string {
   let prompt = 'EXTRACT ALL SKILLS FROM ALL DOMAINS - not just programming. Analyze career data comprehensively:\n\n';
   
   if (cvText) {
     prompt += `CV/RESUME CONTENT (extract ALL skills - technical, business, HR, management, finance, etc.):\n${cvText}\n\n`;
   }
   
-  if (linkedinUrl && linkedinData) {
-    prompt += `LINKEDIN PROFILE DATA:\n`;
-    if (linkedinData.headline) prompt += `Headline: ${linkedinData.headline}\n`;
-    if (linkedinData.experience && linkedinData.experience.length > 0) {
-      prompt += `\nExperience (look for ALL types of skills - management, HR, business, technical, etc.):\n${linkedinData.experience.join('\n')}\n`;
-    }
-    if (linkedinData.skills && linkedinData.skills.length > 0) {
-      prompt += `\nListed Skills: ${linkedinData.skills.join(', ')}\n`;
-    }
-    if (linkedinData.education && linkedinData.education.length > 0) {
-      prompt += `\nEducation:\n${linkedinData.education.join('\n')}\n`;
-    }
-    prompt += '\n';
-  } else if (linkedinUrl) {
-    prompt += `LinkedIn Profile: ${linkedinUrl}\n(Note: Extract skills from experience, endorsements, recommendations, posts, activities)\n\n`;
+  if (linkedinText) {
+    prompt += `LINKEDIN PROFILE DATA (look for ALL types of skills - management, HR, business, technical, etc.):\n${linkedinText}\n\n`;
   }
   
   if (githubUrl && githubData) {
