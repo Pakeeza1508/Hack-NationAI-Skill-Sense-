@@ -26,12 +26,23 @@ serve(async (req) => {
 
     console.log('Fetching GitHub data for user:', username);
 
+    // Get GitHub token from environment (optional, but increases rate limit)
+    const githubToken = Deno.env.get('GITHUB_TOKEN');
+    const headers: Record<string, string> = {
+      'Accept': 'application/vnd.github.v3+json',
+      'User-Agent': 'SkillSense-App',
+    };
+    
+    if (githubToken) {
+      headers['Authorization'] = `token ${githubToken}`;
+      console.log('Using authenticated GitHub API request');
+    } else {
+      console.log('Using unauthenticated GitHub API request (lower rate limit)');
+    }
+
     // Fetch user profile
     const userResponse = await fetch(`https://api.github.com/users/${username}`, {
-      headers: {
-        'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'SkillSense-App',
-      },
+      headers,
     });
 
     if (!userResponse.ok) {
@@ -44,10 +55,7 @@ serve(async (req) => {
     const reposResponse = await fetch(
       `https://api.github.com/users/${username}/repos?sort=updated&per_page=100`,
       {
-        headers: {
-          'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'SkillSense-App',
-        },
+        headers,
       }
     );
 

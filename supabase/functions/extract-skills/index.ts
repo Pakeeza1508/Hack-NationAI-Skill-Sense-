@@ -115,7 +115,7 @@ serve(async (req) => {
           `;
         }
       } catch (e) {
-        console.error('Error fetching validated skills:', e.message);
+        console.error('Error fetching validated skills:', e instanceof Error ? e.message : String(e));
         // Do not block analysis if feedback fails to load
       }
     }
@@ -172,9 +172,9 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Error in extract-skills function:', error.message);
+    console.error('Error in extract-skills function:', error instanceof Error ? error.message : String(error));
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error instanceof Error ? error.message : 'An unexpected error occurred' }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
