@@ -23,5 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 
+.env
+
 code.py
 combined_project_code.txt
