@@ -16,7 +16,6 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
   const [cvText, setCvText] = useState("");
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [githubUrl, setGithubUrl] = useState("");
-  const [linkedinUrl, setLinkedinUrl] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   
   const { toast } = useToast();
@@ -80,10 +79,10 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
 
 
   const handleAnalyze = async () => {
-    if (!cvText && !githubUrl && !linkedinUrl) {
+    if (!cvText && !githubUrl) {
       toast({
         title: "Input Required",
-        description: "Please provide at least one data source (CV, GitHub, or LinkedIn).",
+        description: "Please provide at least one data source (CV or GitHub).",
         variant: "destructive",
       });
       return;
@@ -93,7 +92,6 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
     
     try {
       let githubData = null;
-      let linkedinData = null;
       const dataSources: string[] = [];
 
       // Fetch GitHub data if URL provided
@@ -119,29 +117,6 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
         }
       }
 
-      // Fetch LinkedIn data if URL provided
-      if (linkedinUrl) {
-        try {
-          const { data: liData, error: liError } = await supabase.functions.invoke('scrape-linkedin', {
-            body: { linkedinUrl },
-          });
-          
-          if (liError) {
-            console.error('LinkedIn fetch error:', liError);
-            toast({
-              title: "LinkedIn Data Unavailable",
-              description: "LinkedIn scraping is currently not supported by our data provider. We're working on alternative solutions.",
-              variant: "default",
-            });
-          } else {
-            linkedinData = liData;
-            dataSources.push('linkedin');
-          }
-        } catch (err) {
-          console.error('LinkedIn error:', err);
-        }
-      }
-
       if (cvText) {
         dataSources.push('cv');
       }
@@ -150,8 +125,7 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
       const { data, error } = await supabase.functions.invoke('extract-skills', {
         body: { 
           cvText,
-          githubData,
-          linkedinData
+          githubData
         },
       });
 
@@ -163,7 +137,6 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
         sources: {
           cv: cvText ? true : false,
           github: githubData ? githubUrl : null,
-          linkedin: linkedinData ? linkedinUrl : null,
         }
       };
 
@@ -191,9 +164,9 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
     <section className="py-20">
       <div className="container mx-auto px-4 max-w-3xl">
         <div className="text-center mb-8">
-          <h2 className="text-4xl font-bold mb-3">Multi-Source Skill Analysis</h2>
+          <h2 className="text-4xl font-bold mb-3">Comprehensive Skill Analysis</h2>
           <p className="text-lg text-muted-foreground">
-            Aggregate data from CV, GitHub, and LinkedIn to discover your complete skill profile
+            Discover your complete skill profile from CV and GitHub repositories
           </p>
         </div>
 
@@ -251,27 +224,9 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
               </p>
             </div>
 
-            <div>
-              <Label htmlFor="linkedin-url" className="text-base font-semibold">
-                LinkedIn Profile URL
-              </Label>
-              <Input
-                id="linkedin-url"
-                type="url"
-                placeholder="https://www.linkedin.com/in/yourprofile"
-                value={linkedinUrl}
-                onChange={(e) => setLinkedinUrl(e.target.value)}
-                disabled={isProcessing}
-                className="mt-2"
-              />
-              <p className="text-sm text-muted-foreground mt-1">
-                Extract skills from your professional experience (currently limited support)
-              </p>
-            </div>
-
             <Button
               onClick={handleAnalyze}
-              disabled={isProcessing || (!cvText && !githubUrl && !linkedinUrl)}
+              disabled={isProcessing || (!cvText && !githubUrl)}
               className="w-full text-lg py-6"
               size="lg"
             >
