@@ -78,7 +78,14 @@ Please provide your analysis and resume content in a single JSON object with the
     }
 
     const data = await response.json();
-    const gapAnalysis = JSON.parse(data.choices[0].message.content);
+    let content = data.choices[0].message.content;
+    
+    // Remove markdown code blocks if present
+    content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    
+    console.log('Raw AI response:', content);
+    
+    const gapAnalysis = JSON.parse(content);
 
     console.log('Gap analysis completed successfully');
 
