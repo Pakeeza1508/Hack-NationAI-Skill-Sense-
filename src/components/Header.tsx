@@ -1,7 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Brain } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
+import skillSenseLogo from "@/assets/skillsense-logo.png";
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -12,10 +12,10 @@ export const Header = () => {
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         {/* Left: Logo and Name */}
         <div 
-          className="flex items-center gap-2 cursor-pointer" 
+          className="flex items-center gap-3 cursor-pointer" 
           onClick={() => navigate('/')}
         >
-          <Brain className="w-8 h-8 text-primary" />
+          <img src={skillSenseLogo} alt="SkillSense" className="h-10 w-10" />
           <span className="font-heading font-bold text-xl">SkillSense</span>
         </div>
 

@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Brain, FileText, TrendingUp, Sparkles } from "lucide-react";
+import { Brain, FileText, TrendingUp, Sparkles, Database, Shield, Target } from "lucide-react";
 import { Header } from "@/components/Header";
+import { Badge } from "@/components/ui/badge";
+import skillSenseLogo from "@/assets/skillsense-logo.png";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -46,15 +48,22 @@ const Index = () => {
     <div className="min-h-screen bg-background text-foreground animate-fade-in">
       <Header />
 
-      {/* Main Content */}
+      {/* Hero Section */}
       <main>
         <section className="py-20 md:py-32">
           <div className="container mx-auto px-4 text-center">
+            <div className="flex justify-center mb-6">
+              <img src={skillSenseLogo} alt="SkillSense" className="h-24 w-24" />
+            </div>
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
               Unlock Your <span className="bg-gradient-hero bg-clip-text text-transparent">True Professional Self</span>
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-              SkillSense uses AI to analyze your career data from multiple sources, revealing the full spectrum of your skills—from the explicit to the implicitly demonstrated.
+            <p className="text-xl md:text-2xl text-muted-foreground mb-4 max-w-3xl mx-auto">
+              Advanced NLP-Powered Skill Extraction & Analysis Platform
+            </p>
+            <p className="text-lg text-muted-foreground mb-8 max-w-4xl mx-auto">
+              Aggregate data from multiple sources, extract explicit and implicit skills using semantic analysis, 
+              and generate structured skill profiles with confidence scores and evidence trails.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" onClick={() => navigate('/analyze')} className="text-lg">
@@ -67,31 +76,179 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Features Section */}
-        <section className="py-20 bg-card">
+        {/* Core Features Section */}
+        <section className="py-20 bg-muted/30">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold">A New Dimension of Career Insight</h2>
-              <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">Go beyond simple keywords. Understand your skills in context.</p>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Powered by Advanced NLP & Semantic Analysis
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                Our AI-driven platform uses cutting-edge natural language processing to extract, validate, and structure your professional skills
+              </p>
             </div>
-            <div className="grid md:grid-cols-3 gap-8">
-              <FeatureCard icon={<Brain />} title="Multi-Source Analysis" description="Aggregate data from your CV, LinkedIn, and GitHub to build a holistic view of your professional capabilities." />
-              <FeatureCard icon={<Sparkles />} title="AI-Powered Skill Extraction" description="Our AI identifies not just the skills you list, but also the skills you demonstrate in your project descriptions and experience." />
-              <FeatureCard icon={<TrendingUp />} title="Evidence-Based Profiles" description="Every skill is backed by a confidence score and traced back to the source, giving you full transparency and credibility." />
+
+            <div className="grid md:grid-cols-3 gap-8 mb-12">
+              {/* Feature 1: Explicit & Implicit Skills */}
+              <Card className="p-6 hover:shadow-lg transition-shadow">
+                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  <Brain className="w-7 h-7 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold mb-3">Explicit & Implicit Skill Extraction</h3>
+                <p className="text-muted-foreground mb-4">
+                  Our NLP engine identifies both directly stated skills (e.g., "Python expert") and implicit skills 
+                  demonstrated through projects, posts, and code patterns.
+                </p>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-start gap-2">
+                    <Badge variant="outline" className="mt-0.5">Explicit</Badge>
+                    <span className="text-muted-foreground">Directly mentioned in CV, LinkedIn, performance reviews</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Badge variant="outline" className="mt-0.5">Implicit</Badge>
+                    <span className="text-muted-foreground">Inferred from GitHub repos, blog topics, project descriptions</span>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Feature 2: Structured Profiles */}
+              <Card className="p-6 hover:shadow-lg transition-shadow">
+                <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center mb-4">
+                  <Database className="w-7 h-7 text-accent" />
+                </div>
+                <h3 className="text-xl font-semibold mb-3">Structured Dynamic Profiles</h3>
+                <p className="text-muted-foreground mb-4">
+                  Generate comprehensive, machine-readable skill profiles per person with multi-dimensional analysis 
+                  and SFIA framework mapping.
+                </p>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                    Confidence scores (0-100%) per skill
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                    Evidence trails from each source
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                    Cross-source validation status
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                    SFIA proficiency levels (1-7)
+                  </li>
+                </ul>
+              </Card>
+
+              {/* Feature 3: Validation & Editing */}
+              <Card className="p-6 hover:shadow-lg transition-shadow">
+                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  <Shield className="w-7 h-7 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold mb-3">Hallucination Removal & Validation</h3>
+                <p className="text-muted-foreground mb-4">
+                  Review, edit, and validate AI-identified skills to remove hallucinations and ensure accuracy 
+                  before finalizing your profile.
+                </p>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                    Manual skill validation workflow
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                    Confidence score adjustments
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                    Evidence editing and refinement
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                    Feedback loop for AI improvement
+                  </li>
+                </ul>
+              </Card>
             </div>
+
+            {/* Data Aggregation Feature */}
+            <Card className="p-8 bg-gradient-to-br from-card to-primary/5 border-2 border-primary/20">
+              <div className="flex items-start gap-4">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <TrendingUp className="w-8 h-8 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-semibold mb-3">Multi-Source Data Aggregation</h3>
+                  <p className="text-lg text-muted-foreground mb-4">
+                    Our platform aggregates and cross-references data from multiple professional and internal sources for comprehensive analysis:
+                  </p>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="font-semibold mb-2 flex items-center gap-2">
+                        <Badge variant="outline">Professional Sources</Badge>
+                      </h4>
+                      <ul className="space-y-1 text-sm text-muted-foreground">
+                        <li>• CV/Resume (work history, education)</li>
+                        <li>• LinkedIn (posts, network, experience)</li>
+                        <li>• GitHub (repositories, contributions, code)</li>
+                        <li>• Blogs & Publications (thought leadership)</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-2 flex items-center gap-2">
+                        <Badge variant="outline">Internal Documents</Badge>
+                      </h4>
+                      <ul className="space-y-1 text-sm text-muted-foreground">
+                        <li>• Performance Reviews (manager feedback)</li>
+                        <li>• Goals & Objectives (OKRs, initiatives)</li>
+                        <li>• Reference Letters (peer validation)</li>
+                        <li>• Company assessments (ratings, certifications)</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
           </div>
         </section>
         
         {/* How It Works Section */}
-        <section className="py-20">
+        <section className="py-20 bg-card">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold">Get Your Analysis in 3 Simple Steps</h2>
             </div>
-            <div className="grid md:grid-cols-3 gap-8 text-center">
-              <StepCard number="1" title="Input Your Data" description="Upload your CV or connect your LinkedIn and GitHub profiles securely." />
-              <StepCard number="2" title="AI Analyzes Your Profile" description="Our engine processes your data, identifying skills and finding evidence." />
-              <StepCard number="3" title="Receive Your Skill Profile" description="Explore your interactive dashboard with a complete breakdown of your skills." />
+            <div className="grid md:grid-cols-3 gap-8">
+              <Card className="p-6 text-center hover:shadow-lg transition-shadow">
+                <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+                  1
+                </div>
+                <h3 className="text-xl font-semibold mb-3">Input Your Data</h3>
+                <p className="text-muted-foreground">
+                  Upload your CV and connect LinkedIn & GitHub. Optionally add performance reviews and internal documents.
+                </p>
+              </Card>
+
+              <Card className="p-6 text-center hover:shadow-lg transition-shadow">
+                <div className="w-16 h-16 rounded-full bg-accent text-accent-foreground flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+                  2
+                </div>
+                <h3 className="text-xl font-semibold mb-3">AI Analyzes Your Profile</h3>
+                <p className="text-muted-foreground">
+                  Our NLP engine processes all sources, extracts explicit & implicit skills, and generates evidence trails.
+                </p>
+              </Card>
+
+              <Card className="p-6 text-center hover:shadow-lg transition-shadow">
+                <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+                  3
+                </div>
+                <h3 className="text-xl font-semibold mb-3">Review & Validate</h3>
+                <p className="text-muted-foreground">
+                  Explore your structured skill profile, edit confidence scores, and remove any AI hallucinations.
+                </p>
+              </Card>
             </div>
           </div>
         </section>
@@ -100,21 +257,5 @@ const Index = () => {
     </div>
   );
 };
-
-const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode; title: string; description: string; }) => (
-  <Card className="p-8 text-center hover:shadow-card-hover transition-shadow">
-    <div className="inline-block p-4 bg-primary/10 rounded-lg mb-4">{icon}</div>
-    <h3 className="text-xl font-semibold mb-2">{title}</h3>
-    <p className="text-muted-foreground">{description}</p>
-  </Card>
-);
-
-const StepCard = ({ number, title, description }: { number: string; title: string; description: string; }) => (
-  <div className="p-6">
-    <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 border-2 border-primary rounded-full text-2xl font-bold text-primary">{number}</div>
-    <h3 className="text-xl font-semibold mb-2">{title}</h3>
-    <p className="text-muted-foreground">{description}</p>
-  </div>
-);
 
 export default Index;
