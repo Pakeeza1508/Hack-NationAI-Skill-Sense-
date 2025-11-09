@@ -2,6 +2,22 @@
 
 **[➡️ View Live Demo](https://latent-glow.lovable.app/)**
 
+## 📂 Project Structure
+
+    ├── /src/                # Frontend source code
+    │   ├── /components/     # Reusable React components
+    │   ├── /pages/          # Main page components (views)
+    │   ├── /integrations/   # Supabase client and types
+    │   └── App.tsx          # Main application router
+    │
+    ├── /supabase/           # Backend configuration and code
+    │   ├── /functions/      # Serverless Edge Functions (the core backend logic)
+    │   │   ├── /extract-skills/
+    │   │   └── /analyze-gap/
+    │   └── /migrations/     # Database schema and SQL migrations
+    │
+    └── README.md
+
 SkillSense is an AI-powered application designed to revolutionize how professionals discover, validate, and articulate their skills. Our mission is to empower you to translate your entire career history into a clear, evidence-based skill profile, helping you navigate your career path with confidence.
 
 In a world shifting from credential-based hiring to skills-based talent management, SkillSense addresses a critical gap: many valuable skills acquired through projects, mentorship, and informal learning go unnoticed. Our platform aggregates data from multiple sources to uncover both explicit and implicit expertise, providing actionable insights for career growth.
