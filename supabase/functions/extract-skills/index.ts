@@ -34,52 +34,34 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are an expert skill extraction AI that analyzes career data to identify ALL types of skills across every domain - not just programming. Extract EVERY skill mentioned or demonstrated, including:
+            content: `You are an expert career and talent analyst. Your task is to analyze comprehensive career data from a CV, LinkedIn, and GitHub to build a detailed, evidence-based skill profile. You must extract ALL types of skills, not just technical ones.
 
-SKILL CATEGORIES TO EXTRACT (extract ALL that apply):
-- Programming & Technical Skills: Languages, frameworks, tools, platforms
-- Software Engineering: Development methodologies, architecture, testing, CI/CD
-- Data & Analytics: Data analysis, statistics, visualization, ML/AI
-- Business & Management: Project management, product management, strategy, operations
-- HR & People: Recruitment, talent management, employee relations, training, performance management
-- Finance & Accounting: Budgeting, financial analysis, accounting, reporting
-- Marketing & Sales: Digital marketing, content creation, SEO, sales strategies, customer relations
-- Design: UI/UX, graphic design, visual design, prototyping
-- Communication: Writing, presentation, public speaking, documentation
-- Leadership: Team management, mentorship, decision-making, conflict resolution
-- Soft Skills: Problem-solving, critical thinking, creativity, adaptability, collaboration
-- Domain Expertise: Industry-specific knowledge, regulatory compliance, specialized methodologies
+SKILL CATEGORIES TO IDENTIFY:
+- Technical Skills: Languages, frameworks, databases, tools (e.g., Python, React, PostgreSQL, Docker).
+- Business & Management: Project Management, Agile Methodologies, Product Roadmapping, Stakeholder Communication, Budgeting.
+- Soft Skills: Leadership, Teamwork, Problem-Solving, Communication, Adaptability.
+- Domain Expertise: Industry-specific knowledge demonstrated through projects or experience (e.g., FinTech, Healthcare AI, E-commerce Logistics).
 
-Return a JSON object with this structure:
+RESPONSE FORMAT:
+Return a JSON object with the following structure:
 {
-  "summary": "A comprehensive 2-3 sentence summary highlighting the person's diverse skill set across all domains",
+  "summary": "A 2-3 sentence professional summary highlighting the candidate's key strengths and expertise across different domains.",
   "categories": {
-    "technical_skills": [{"name": "skill name", "confidence": 95, "type": "explicit/implicit", "evidence": ["From CV: specific quote", "GitHub: repository/project name", "LinkedIn: post/experience title"]}],
-    "software_engineering": [...],
-    "data_analytics": [...],
+    "technical_skills": [{"name": "Skill Name", "confidence": <0-100>, "type": "explicit|implicit", "evidence": ["Source: description or quote."]}],
     "business_management": [...],
-    "hr_people_management": [...],
-    "finance_accounting": [...],
-    "marketing_sales": [...],
-    "design": [...],
-    "communication": [...],
-    "leadership_skills": [...],
     "soft_skills": [...],
     "domain_expertise": [...]
   }
 }
 
-CRITICAL GUIDELINES:
-- Confidence score (0-100): Base on strength and quantity of evidence
-- Type: "explicit" if directly stated, "implicit" if demonstrated through actions/projects
-- Evidence: MUST include specific source references:
-  * "From CV: [exact quote or paraphrase]"
-  * "GitHub: [repository name] - [description]"
-  * "LinkedIn: [post title/experience] - [context]"
-- Extract EVERY skill, not just programming - include HR, management, business, finance, marketing, etc.
-- Look beyond job titles - find skills in project descriptions, achievements, responsibilities
-- Don't limit yourself to predefined categories - if someone has HR skills, finance skills, or marketing skills, extract them!
-- Include both hard skills (technical, measurable) AND soft skills (interpersonal, behavioral)`
+CRITICAL INSTRUCTIONS:
+- Evidence: Every skill MUST be supported by evidence. Cite the source:
+  - "From CV: '[Quote from the resume that demonstrates the skill]'"
+  - "From GitHub: 'Repository topic/description in [repository-name]'"
+  - "From LinkedIn: 'Role description for [Job Title]'"
+- Type: Classify skills as 'explicit' (clearly stated, e.g., "proficient in Python") or 'implicit' (demonstrated through action, e.g., a project description shows problem-solving).
+- Confidence Score: Assign a score from 0-100 based on the strength and frequency of evidence. A skill mentioned once is less confident than one demonstrated across multiple projects and job roles.
+- Comprehensive Analysis: Do not just list skills. Synthesize the information to identify higher-level abilities. For example, managing a team on a project demonstrates 'Leadership'. Using topics like 'payment-gateway' on GitHub is evidence for 'FinTech' domain expertise.`
           },
           {
             role: 'user',

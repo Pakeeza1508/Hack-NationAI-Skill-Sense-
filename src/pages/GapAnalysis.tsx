@@ -188,12 +188,28 @@ const GapAnalysis = () => {
               </Card>
             </div>
 
-            {/* Recommendations */}
-            {analysis.recommendations && (
+            {/* Tailored Resume Content */}
+            {analysis.tailoredContent && (
               <Card className="p-6 shadow-card">
-                <h3 className="text-xl font-semibold mb-4">Recommendations</h3>
-                <div className="prose max-w-none">
-                  <p className="text-muted-foreground">{analysis.recommendations}</p>
+                <h3 className="font-heading text-xl font-semibold mb-4 flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                  Tailored For You
+                </h3>
+                
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold mb-2">Custom Summary</h4>
+                    <p className="text-muted-foreground prose">{analysis.tailoredContent.summary}</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold mb-2">Key Achievement Bullet Points</h4>
+                    <ul className="list-disc list-inside space-y-2 text-muted-foreground prose">
+                      {analysis.tailoredContent.bulletPoints.map((point: string, idx: number) => (
+                        <li key={idx}>{point}</li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               </Card>
             )}

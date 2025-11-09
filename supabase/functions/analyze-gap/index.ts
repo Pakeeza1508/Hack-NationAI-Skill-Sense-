@@ -25,31 +25,29 @@ serve(async (req) => {
       .flat()
       .map((skill: any) => ({ name: skill.name, confidence: skill.confidence }));
 
-    const prompt = `You are a career advisor analyzing skill gaps. Compare the candidate's skills against this job description.
+    const prompt = `You are an expert career coach and resume writer. A candidate has provided their skill profile, and they want to apply for a specific job. Your task is to perform a detailed gap analysis and then generate tailored content for their resume.
 
-CANDIDATE SKILLS:
+CANDIDATE'S SKILL PROFILE:
 ${JSON.stringify(userSkills, null, 2)}
 
-JOB DESCRIPTION:
+TARGET JOB DESCRIPTION:
 ${jobDescription}
 
-Provide a detailed gap analysis in JSON format:
+Please provide your analysis and resume content in a single JSON object with the following structure:
 {
-  "matchPercentage": <number 0-100>,
-  "matches": [
-    {"name": "skill name", "confidence": <number>}
-  ],
-  "gaps": ["skill 1", "skill 2"],
-  "untappedStrengths": ["skill 1", "skill 2"],
-  "recommendations": "Brief paragraph with actionable advice"
-}
-
-Guidelines:
-- matchPercentage: Overall fit (0-100)
-- matches: Skills candidate has that job requires
-- gaps: Required skills candidate lacks
-- untappedStrengths: Candidate skills not required but valuable
-- recommendations: 2-3 sentences with next steps`;
+  "matchPercentage": <number from 0-100 representing the overall skill overlap>,
+  "matches": ["Skill 1", "Skill 2"],
+  "gaps": ["Skill A", "Skill B"],
+  "untappedStrengths": ["Extra Skill 1", "Extra Skill 2"],
+  "tailoredContent": {
+    "summary": "A 2-3 sentence professional summary, rewritten to highlight the candidate's most relevant skills for THIS job.",
+    "bulletPoints": [
+      "An achievement-oriented bullet point that combines a candidate's skill with a potential outcome relevant to the job.",
+      "Another powerful bullet point showcasing their value for this specific role.",
+      "A third bullet point that directly addresses a key requirement in the job description."
+    ]
+  }
+}`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',

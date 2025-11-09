@@ -1,199 +1,128 @@
-import { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Sparkles, Brain, TrendingUp, FileText, ArrowUp, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Brain, FileText, TrendingUp, Sparkles, Target } from "lucide-react";
 
 const Index = () => {
-  const [showBackToTop, setShowBackToTop] = useState(false);
-  const heroRef = useRef<HTMLDivElement>(null);
-  const featuresRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowBackToTop(window.scrollY > 400);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const handleAnalyzeClick = () => {
-    navigate('/analyze');
-  };
-
   const handleViewDemo = () => {
-    console.log('View Demo button clicked');
     const demoProfile = {
-      name: "Demo User",
-      title: "Software Engineer",
-      summary: "An experienced professional with expertise in full-stack development, cloud technologies, and team leadership.",
+      name: "Alex Doe",
+      title: "Senior Product Manager",
+      summary: "A seasoned product manager with over 8 years of experience leading cross-functional teams to deliver innovative software solutions. Expert in Agile methodologies, user-centric design, and data-driven decision-making with a background in software engineering.",
       completeness: 85,
       categories: {
-        technical: [
-          { name: "Python", confidence: 95, type: "explicit", evidence: ["Led development of data processing pipeline"] },
-          { name: "JavaScript", confidence: 90, type: "explicit", evidence: ["Built React applications"] },
-          { name: "SQL", confidence: 85, type: "explicit", evidence: ["Database optimization projects"] }
+        technical_skills: [
+          { name: "SQL", confidence: 90, type: "explicit", evidence: ["Developed complex queries for data analysis."] },
+          { name: "API Integration", confidence: 85, type: "implicit", evidence: ["Oversaw integration of multiple third-party APIs."] }
+        ],
+        business_management: [
+          { name: "Product Roadmapping", confidence: 95, type: "explicit", evidence: ["Created and managed product roadmaps for 5 major releases."] },
+          { name: "Agile Methodologies", confidence: 98, type: "explicit", evidence: ["Led sprint planning and retrospectives as a Scrum Master."] }
         ],
         soft_skills: [
-          { name: "Leadership", confidence: 80, type: "implicit", evidence: ["Managed team of 5 developers"] },
-          { name: "Communication", confidence: 85, type: "implicit", evidence: ["Regular stakeholder presentations"] }
+          { name: "Stakeholder Communication", confidence: 92, type: "implicit", evidence: ["Presented quarterly updates to executive leadership."] },
+          { name: "Team Leadership", confidence: 90, type: "explicit", evidence: ["Managed and mentored a team of 8 product owners and engineers."] }
         ]
       },
       topSkills: [
-        { name: "Python", confidence: 95 },
-        { name: "JavaScript", confidence: 90 },
-        { name: "SQL", confidence: 85 },
-        { name: "Leadership", confidence: 80 },
-        { name: "Communication", confidence: 85 }
+        { name: "Agile Methodologies", confidence: 98 },
+        { name: "Product Roadmapping", confidence: 95 },
+        { name: "Stakeholder Communication", confidence: 92 },
+        { name: "SQL", confidence: 90 },
+        { name: "Team Leadership", confidence: 90 }
       ],
       dataSources: ['cv', 'linkedin'],
-      recentActivity: [
-        { title: "Demo profile loaded", date: new Date().toLocaleDateString() }
-      ]
+      recentActivity: [{ title: "Demo profile loaded", date: new Date().toLocaleDateString() }]
     };
     
     localStorage.setItem('skillProfile', JSON.stringify(demoProfile));
     navigate('/dashboard');
   };
 
-  const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
-    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header Navigation */}
-      <header className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+    <div className="min-h-screen bg-background text-foreground animate-fade-in">
+      {/* Header */}
+      <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Brain className="w-8 h-8 text-primary" />
             <span className="font-heading font-bold text-xl">SkillSense</span>
           </div>
-          <Button
-            onClick={() => navigate('/dashboard')}
-            className="px-6"
-          >
-            Go to Dashboard
-          </Button>
+          <Button onClick={() => navigate('/dashboard')}>Go to Dashboard</Button>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section ref={heroRef} className="relative overflow-hidden pointer-events-auto min-h-[calc(100vh-80px)] flex items-center">
-        <div className="absolute inset-0 bg-gradient-hero opacity-5 pointer-events-none" />
-        <div className="container mx-auto px-4 py-20 md:py-32 relative z-10 w-full">
-          <div className="max-w-4xl mx-auto text-center space-y-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-sm text-primary font-medium">
-              <Sparkles className="w-4 h-4" />
-              AI-Powered Skill Discovery
-            </div>
-            
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight">
-              Discover Your
-              <span className="block bg-gradient-hero bg-clip-text text-transparent">
-                Hidden Potential
-              </span>
+      {/* Main Content */}
+      <main>
+        {/* Hero Section */}
+        <section className="py-20 md:py-32">
+          <div className="container mx-auto px-4 text-center">
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+              Unlock Your <span className="bg-gradient-hero bg-clip-text text-transparent">True Professional Self</span>
             </h1>
-            
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              SkillSense transforms scattered career data into comprehensive skill profiles. 
-              Uncover explicit and implicit capabilities you never knew you had.
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
+              SkillSense uses AI to analyze your career data from multiple sources, revealing the full spectrum of your skills—from the explicit to the implicitly demonstrated.
             </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
-              <button
-                type="button"
-                className="inline-flex items-center justify-center gap-2 h-11 rounded-md px-8 text-lg font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                onClick={() => {
-                  console.log('Analyze button clicked - direct handler');
-                  handleAnalyzeClick();
-                }}
-              >
-                <Brain className="mr-2 h-5 w-5" />
-                Analyze Your Skills
-              </button>
-              <button
-                type="button"
-                className="inline-flex items-center justify-center gap-2 h-11 rounded-md px-8 text-lg font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
-                onClick={() => {
-                  console.log('View Demo button clicked - direct handler');
-                  handleViewDemo();
-                }}
-              >
-                <FileText className="mr-2 h-5 w-5" />
-                View Demo
-              </button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" onClick={() => navigate('/analyze')} className="text-lg">
+                <Sparkles className="mr-2 h-5 w-5" /> Analyze Your Profile
+              </Button>
+              <Button size="lg" variant="outline" onClick={handleViewDemo} className="text-lg">
+                <FileText className="mr-2 h-5 w-5" /> View Demo
+              </Button>
             </div>
-
-            {/* Scroll Down Indicator */}
-            <button
-              onClick={() => scrollToSection(featuresRef)}
-              className="mt-12 mx-auto flex flex-col items-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
-              aria-label="Scroll to features"
-            >
-              <span className="text-sm font-medium">Learn More</span>
-              <ChevronDown className="w-6 h-6 animate-bounce" />
-            </button>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Features Section */}
-      <section ref={featuresRef} className="py-20 bg-gradient-card scroll-mt-20">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <FeatureCard
-              icon={<Brain className="w-8 h-8 text-primary" />}
-              title="Multi-Source Analysis"
-              description="Aggregate data from CVs, LinkedIn, GitHub, and more to build a complete picture of your capabilities."
-            />
-            <FeatureCard
-              icon={<Sparkles className="w-8 h-8 text-primary" />}
-              title="AI Skill Extraction"
-              description="Advanced NLP identifies both explicit skills and implicit capabilities hidden in your career story."
-            />
-            <FeatureCard
-              icon={<TrendingUp className="w-8 h-8 text-primary" />}
-              title="Evidence-Based Profiles"
-              description="Every skill comes with confidence scores and direct evidence trails for complete transparency."
-            />
+        {/* Features Section */}
+        <section className="py-20 bg-card">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold">A New Dimension of Career Insight</h2>
+              <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">Go beyond simple keywords. Understand your skills in context.</p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-8">
+              <FeatureCard icon={<Brain />} title="Multi-Source Analysis" description="Aggregate data from your CV, LinkedIn, and GitHub to build a holistic view of your professional capabilities." />
+              <FeatureCard icon={<Sparkles />} title="AI-Powered Skill Extraction" description="Our AI identifies not just the skills you list, but also the skills you demonstrate in your project descriptions and experience." />
+              <FeatureCard icon={<TrendingUp />} title="Evidence-Based Profiles" description="Every skill is backed by a confidence score and traced back to the source, giving you full transparency and credibility." />
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+        
+        {/* How It Works Section */}
+        <section className="py-20">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold">Get Your Analysis in 3 Simple Steps</h2>
+            </div>
+            <div className="grid md:grid-cols-3 gap-8 text-center">
+              <StepCard number="1" title="Input Your Data" description="Upload your CV or connect your LinkedIn and GitHub profiles securely." />
+              <StepCard number="2" title="AI Analyzes Your Profile" description="Our engine processes your data, identifying skills and finding evidence." />
+              <StepCard number="3" title="Receive Your Skill Profile" description="Explore your interactive dashboard with a complete breakdown of your skills." />
+            </div>
+          </div>
+        </section>
 
-      {/* Back to Top Button */}
-      {showBackToTop && (
-        <button
-          onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-50 p-3 bg-primary text-primary-foreground rounded-full shadow-lg hover:bg-primary/90 transition-all duration-300 hover:scale-110"
-          aria-label="Back to top"
-        >
-          <ArrowUp className="w-6 h-6" />
-        </button>
-      )}
+      </main>
     </div>
   );
 };
 
-const FeatureCard = ({ 
-  icon, 
-  title, 
-  description 
-}: { 
-  icon: React.ReactNode; 
-  title: string; 
-  description: string; 
-}) => (
-  <div className="p-8 rounded-2xl bg-card shadow-card hover:shadow-card-hover transition-all duration-300 border border-border h-full flex flex-col">
-    <div className="mb-6 flex items-center justify-center w-16 h-16 bg-primary/10 rounded-xl">
-      {icon}
-    </div>
-    <h3 className="text-xl font-semibold mb-3">{title}</h3>
-    <p className="text-muted-foreground leading-relaxed">{description}</p>
+const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode; title: string; description: string; }) => (
+  <Card className="p-8 text-center hover:shadow-card-hover transition-shadow">
+    <div className="inline-block p-4 bg-primary/10 rounded-lg mb-4">{icon}</div>
+    <h3 className="text-xl font-semibold mb-2">{title}</h3>
+    <p className="text-muted-foreground">{description}</p>
+  </Card>
+);
+
+const StepCard = ({ number, title, description }: { number: string; title: string; description: string; }) => (
+  <div className="p-6">
+    <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 border-2 border-primary rounded-full text-2xl font-bold text-primary">{number}</div>
+    <h3 className="text-xl font-semibold mb-2">{title}</h3>
+    <p className="text-muted-foreground">{description}</p>
   </div>
 );
 
