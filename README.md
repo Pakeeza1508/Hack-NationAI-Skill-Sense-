@@ -4,17 +4,17 @@
 
 ## 📂 Project Structure
 
-    ├── /src/                # Frontend source code
-    │   ├── /components/     # Reusable React components
-    │   ├── /pages/          # Main page components (views)
-    │   ├── /integrations/   # Supabase client and types
-    │   └── App.tsx          # Main application router
+    ├── /src/                
+    │   ├── /components/     
+    │   ├── /pages/         
+    │   ├── /integrations/
+    │   └── App.tsx         
     │
-    ├── /supabase/           # Backend configuration and code
-    │   ├── /functions/      # Serverless Edge Functions (the core backend logic)
+    ├── /supabase/          
+    │   ├── /functions/     
     │   │   ├── /extract-skills/
     │   │   └── /analyze-gap/
-    │   └── /migrations/     # Database schema and SQL migrations
+    │   └── /migrations/   
     │
     └── README.md
 
