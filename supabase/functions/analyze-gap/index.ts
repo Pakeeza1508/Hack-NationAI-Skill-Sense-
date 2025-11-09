@@ -25,28 +25,60 @@ serve(async (req) => {
       .flat()
       .map((skill: any) => ({ name: skill.name, confidence: skill.confidence }));
 
-    const prompt = `You are an expert career coach and resume writer. A candidate has provided their skill profile, and they want to apply for a specific job. Your task is to perform a detailed gap analysis and then generate tailored content for their resume.
+    const prompt = `You are an HONEST career advisor performing a skill gap analysis. You must be brutally honest and accurate.
 
-CANDIDATE'S SKILL PROFILE:
+CANDIDATE'S ACTUAL SKILL PROFILE:
 ${JSON.stringify(userSkills, null, 2)}
+
+CANDIDATE'S FULL PROFILE DATA:
+${JSON.stringify(userProfile, null, 2)}
 
 TARGET JOB DESCRIPTION:
 ${jobDescription}
 
-Please provide your analysis and resume content in a single JSON object with the following structure:
+CRITICAL INSTRUCTIONS - DO NOT HALLUCINATE:
+
+1. MATCH PERCENTAGE CALCULATION:
+   - Only count skills as "matching" if they appear in BOTH the candidate's profile AND the job description
+   - If the candidate is a beginner with no relevant experience for this role, the match percentage should be LOW (0-30%)
+   - Be HONEST - don't inflate scores
+
+2. MATCHING SKILLS:
+   - ONLY list skills that the candidate ACTUALLY HAS (from their profile) that the job REQUIRES
+   - Each match must have evidence from the candidate's actual profile
+   - Format: [{"name": "Skill Name", "evidence": "actual quote or reference from their profile"}]
+
+3. SKILL GAPS:
+   - List ALL skills required by the job that the candidate does NOT have
+   - Be specific about what's missing
+
+4. UNTAPPED STRENGTHS:
+   - ONLY list skills the candidate HAS that are NOT required by the job
+   - These are bonus skills, not gaps
+
+5. TAILORED CONTENT:
+   - Summary: Write ONLY based on what the candidate has actually done (from their profile)
+   - DO NOT make up achievements or experiences
+   - If they're a beginner, acknowledge it honestly
+   - Bullet Points: Create ONLY from their ACTUAL experiences in the profile
+   - NEVER fabricate projects, roles, or achievements they haven't done
+   - If they lack relevant experience, suggest ways to FRAME their existing experience, not invent new ones
+
+Return JSON with this structure:
 {
-  "matchPercentage": <number from 0-100 representing the overall skill overlap>,
-  "matches": ["Skill 1", "Skill 2"],
-  "gaps": ["Skill A", "Skill B"],
-  "untappedStrengths": ["Extra Skill 1", "Extra Skill 2"],
+  "matchPercentage": <honest number 0-100>,
+  "matches": [{"name": "Skill", "evidence": "from their actual profile"}],
+  "gaps": ["Missing Skill 1", "Missing Skill 2"],
+  "untappedStrengths": ["Extra Skill they have"],
   "tailoredContent": {
-    "summary": "A 2-3 sentence professional summary, rewritten to highlight the candidate's most relevant skills for THIS job.",
+    "summary": "Based on ACTUAL profile data only",
     "bulletPoints": [
-      "An achievement-oriented bullet point that combines a candidate's skill with a potential outcome relevant to the job.",
-      "Another powerful bullet point showcasing their value for this specific role.",
-      "A third bullet point that directly addresses a key requirement in the job description."
+      "Based on REAL experience from profile",
+      "Another REAL achievement from profile",
+      "Third REAL point from profile"
     ]
-  }
+  },
+  "honestAssessment": "Brief honest statement about candidacy level (e.g., 'Strong fit', 'Partial fit - needs development in X', 'Entry-level candidate for senior role - significant gaps')"
 }`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {

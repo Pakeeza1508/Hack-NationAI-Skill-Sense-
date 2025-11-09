@@ -25,8 +25,26 @@ const GapAnalysis = () => {
       return;
     }
 
-    const savedProfile = localStorage.getItem('skillProfile');
-    if (!savedProfile) {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to perform gap analysis.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Fetch the actual saved profile from database
+    const { data: profiles, error: profileError } = await supabase
+      .from('skill_profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (profileError || !profiles || profiles.length === 0) {
       toast({
         title: "No Profile Found",
         description: "Please analyze your skills first before comparing to jobs.",
@@ -35,12 +53,14 @@ const GapAnalysis = () => {
       return;
     }
 
+    const savedProfile = profiles[0].profile_data;
+
     setIsAnalyzing(true);
 
     try {
       const { data, error } = await supabase.functions.invoke('analyze-gap', {
         body: {
-          userProfile: JSON.parse(savedProfile),
+          userProfile: savedProfile,
           jobDescription,
         },
       });
@@ -202,10 +222,18 @@ const GapAnalysis = () => {
                 <p className="text-lg font-medium">
                   {analysis.matchPercentage >= 80 && "🎉 Excellent Match! You're highly qualified for this role"}
                   {analysis.matchPercentage >= 60 && analysis.matchPercentage < 80 && "👍 Good Match! You have strong potential with some areas to develop"}
-                  {analysis.matchPercentage < 60 && "💡 Moderate Match - Great learning opportunity with clear development path"}
+                  {analysis.matchPercentage >= 40 && analysis.matchPercentage < 60 && "💪 Moderate Match - You have foundational skills but need significant development"}
+                  {analysis.matchPercentage >= 20 && analysis.matchPercentage < 40 && "📚 Entry-Level Match - Consider this a stretch goal with major skill gaps to address"}
+                  {analysis.matchPercentage < 20 && "🎯 Low Match - This role requires skills you haven't developed yet. Focus on building fundamentals first"}
                 </p>
+                {analysis.honestAssessment && (
+                  <div className="mt-4 p-4 bg-muted/50 rounded-lg border border-border">
+                    <p className="text-sm font-semibold mb-1">Honest Assessment:</p>
+                    <p className="text-sm text-muted-foreground">{analysis.honestAssessment}</p>
+                  </div>
+                )}
                 <p className="text-sm text-muted-foreground">
-                  This score is based on comparing your verified skills from CV, LinkedIn, and GitHub against the job requirements
+                  This score reflects ACTUAL matches between your verified skills and job requirements
                 </p>
               </div>
             </Card>
@@ -231,13 +259,16 @@ const GapAnalysis = () => {
                   {analysis.matches?.length || 0} skills match
                 </Badge>
                 <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                  {analysis.matches?.map((skill: any, idx: number) => (
+                  {analysis.matches?.map((match: any, idx: number) => (
                     <div key={idx} className="p-3 rounded-lg bg-accent/10 border border-accent/20 hover:bg-accent/20 transition-colors">
-                      <span className="font-medium text-sm">✓ {skill.name || skill}</span>
+                      <span className="font-medium text-sm">✓ {match.name || match}</span>
+                      {match.evidence && (
+                        <p className="text-xs text-muted-foreground mt-1 italic">{match.evidence}</p>
+                      )}
                     </div>
                   ))}
                   {(!analysis.matches || analysis.matches.length === 0) && (
-                    <p className="text-sm text-muted-foreground italic">No direct matches found - consider developing the required skills</p>
+                    <p className="text-sm text-muted-foreground italic">No direct matches found - you need to develop the required skills</p>
                   )}
                 </div>
               </Card>
@@ -328,15 +359,18 @@ const GapAnalysis = () => {
                   <div className="p-4 bg-card rounded-lg border border-border">
                     <div className="flex items-center gap-2 mb-3">
                       <Badge variant="outline" className="bg-primary/10">Professional Summary</Badge>
-                      <span className="text-xs text-muted-foreground">Use this at the top of your resume</span>
+                      <span className="text-xs text-muted-foreground">Based on your actual experience</span>
                     </div>
                     <p className="text-base leading-relaxed">{analysis.tailoredContent.summary}</p>
+                    <p className="text-xs text-muted-foreground mt-2 italic">
+                      Note: This summary is based only on what you've actually done. Do not exaggerate or add false information.
+                    </p>
                   </div>
 
                   <div className="p-4 bg-card rounded-lg border border-border">
                     <div className="flex items-center gap-2 mb-3">
-                      <Badge variant="outline" className="bg-primary/10">Key Achievement Bullets</Badge>
-                      <span className="text-xs text-muted-foreground">Highlight these in your experience section</span>
+                      <Badge variant="outline" className="bg-primary/10">Achievement Bullets</Badge>
+                      <span className="text-xs text-muted-foreground">Based on your real projects and experience</span>
                     </div>
                     <ul className="space-y-3">
                       {analysis.tailoredContent.bulletPoints.map((point: string, idx: number) => (
@@ -346,6 +380,9 @@ const GapAnalysis = () => {
                         </li>
                       ))}
                     </ul>
+                    <p className="text-xs text-muted-foreground mt-3 italic">
+                      These are framed from your actual work. Only include experiences you can discuss in detail during interviews.
+                    </p>
                   </div>
                 </div>
               </Card>
