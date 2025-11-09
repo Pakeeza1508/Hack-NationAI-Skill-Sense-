@@ -1,73 +1,136 @@
-# Welcome to your Lovable project
+## SkillSense: AI-Powered Skill Discovery Platform
 
-## Project info
+SkillSense is an AI-powered application designed to revolutionize how professionals discover, validate, and articulate their skills. Our mission is to empower you to translate your entire career history into a clear, evidence-based skill profile, helping you navigate your career path with confidence.
 
-**URL**: https://lovable.dev/projects/52b62db7-1345-4349-8aa5-4d841ec17020
+In a world shifting from credential-based hiring to skills-based talent management, SkillSense addresses a critical gap: many valuable skills acquired through projects, mentorship, and informal learning go unnoticed. Our platform aggregates data from multiple sources to uncover both explicit and implicit expertise, providing actionable insights for career growth.
 
-## How can I edit this code?
+# ✨ Core Features
 
-There are several ways of editing your application.
+🧠 Multi-Source Data Aggregation: Connect your CV, GitHub profile, and internal documents (like performance reviews and goals) to build a single, unified view of your professional identity.
 
-**Use Lovable**
+🤖 AI-Powered Skill Extraction: Our NLP engine uses semantic analysis to identify not just the skills you list, but also the skills you demonstrate through your work and contributions.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/52b62db7-1345-4349-8aa5-4d841ec17020) and start prompting.
+📊 Dynamic Skill Profiles: Explore your capabilities through an interactive dashboard, complete with confidence scores, evidence trails, and skill categorization.
 
-Changes made via Lovable will be committed automatically to this repo.
+🎯 Skill Gap Analysis: Paste any job description to instantly compare your profile, identify matching skills, discover gaps, and see what makes you a unique candidate.
 
-**Use your preferred IDE**
+✍️ AI-Powered Resume Enhancement: Generate a professional summary and tailored resume bullet points optimized for specific job applications, all based on your validated skill profile.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+📈 Skills Development Timeline: Visualize your skill acquisition and growth over time, with milestones automatically generated from the evidence in your data.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+✅ Hallucination Removal & Validation: Manually review, edit, confirm, or reject AI-identified skills to ensure your profile is 100% accurate and reflects your true expertise.
 
-Follow these steps:
+# 🚀 Getting Started
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+Prerequisites
 
-# Step 3: Install the necessary dependencies.
-npm i
+Node.js & npm: (v18 or higher recommended). You can use nvm to manage Node versions.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+Supabase Account: You will need a free account at supabase.com to create a database and get your API keys.
+```
+1. Clone the Repository
+
+git clone https://github.com/Pakeeza1508/Hack-NationAI-Skill-Sense-.git
+cd Hack-NationAI-Skill-Sense-
 ```
 
-**Edit a file directly in GitHub**
+2. Install Dependencies
+```
+npm install
+```
+3. Set Up Environment Variables
+```
+Create a new file named .env in the root of the project.
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
 
-**Use GitHub Codespaces**
+# .env.example
+```
+VITE_SUPABASE_URL="YOUR_SUPABASE_URL"
+VITE_SUPABASE_PUBLISHABLE_KEY="YOUR_SUPABASE_ANON_KEY"
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+VITE_SUPABASE_URL is your Project URL.
 
-## What technologies are used for this project?
+VITE_SUPABASE_PUBLISHABLE_KEY is your anon public key.
+```
+4. Set Up Supabase Backend
+```
+npx supabase db push
+```
+5. Run the Development Server
+```
+You are now ready to start the application!
 
-This project is built with:
+npm run dev
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Open http://localhost:8080 to view the application in your browser.
+```
+# 🛠️ Technology Stack
+```
+Frontend:
 
-## How can I deploy this project?
+Framework: React 18 with Vite
 
-Simply open [Lovable](https://lovable.dev/projects/52b62db7-1345-4349-8aa5-4d841ec17020) and click on Share -> Publish.
+Language: TypeScript
 
-## Can I connect a custom domain to my Lovable project?
+Styling: Tailwind CSS
 
-Yes, you can!
+UI Components: shadcn/ui
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Routing: React Router
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+State Management: React Query for server state
+```
+```
+Backend:
+
+Platform: Supabase
+
+Database: PostgreSQL
+
+Serverless Functions: Supabase Edge Functions (Deno runtime)
+
+Authentication: Supabase Auth
+```
+```
+AI & NLP:
+
+Provider: Google Gemini via Lovable AI Gateway
+
+External APIs: GitHub API, Firecrawl API (for LinkedIn scraping)
+```
+# 🗺️ Roadmap & Future Work
+
+While the core MVP is functional, here are some features planned for future development:
+
+Implement AI Feedback Loop: Use the validated_skills data to refine future AI analyses.
+
+Personalized Learning Recommendations: Suggest courses or projects based on identified skill gaps.
+
+Team & Organization Features: Allow users to form teams, find internal experts, and analyze collective skill gaps.
+
+Public Profile Sharing: Implement privacy controls to allow users to share a public, read-only version of their skill profile.
+
+SFIA Framework Visualization: Display the SFIA proficiency levels and categories for each skill in the UI.
+
+# 🤝 Contributing
+
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are greatly appreciated.
+
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+```
+Fork the Project
+
+Create your Feature Branch (git checkout -b feature/AmazingFeature)
+
+Commit your Changes (git commit -m 'Add some AmazingFeature')
+
+Push to the Branch (git push origin feature/AmazingFeature)
+
+Open a Pull Request
+```
+# 📄 License
+
+Distributed under the MIT License. See LICENSE for more information.
