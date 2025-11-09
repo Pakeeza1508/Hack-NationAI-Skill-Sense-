@@ -1,11 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-// Use ESM module for PDF parsing
-const pdfParse = (await import("https://esm.sh/pdf-parse@1.1.1")).default;
-
-// Import DOCX parsing library
-const mammoth = (await import("https://esm.sh/mammoth@1.6.0")).default;
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -34,38 +28,55 @@ serve(async (req) => {
 
     let extractedText = '';
 
-    // Handle PDF files
-    if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
-      const arrayBuffer = await file.arrayBuffer();
-      const buffer = new Uint8Array(arrayBuffer);
-      
-      try {
-        const data = await pdfParse(buffer);
-        extractedText = data.text;
-        console.log('PDF parsed successfully, extracted', extractedText.length, 'characters');
-      } catch (pdfError) {
-        console.error('PDF parsing error:', pdfError);
-        throw new Error('Failed to parse PDF file. Please ensure it is a valid PDF.');
-      }
-    } 
     // Handle text files
-    else if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
+    if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
       extractedText = await file.text();
       console.log('Text file parsed successfully');
     }
-    // Handle Word documents
+    // For PDF and DOCX files, use the Lovable AI document parsing API
     else if (
+      file.type === 'application/pdf' || 
+      file.name.endsWith('.pdf') ||
       file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
       file.name.endsWith('.docx')
     ) {
+      const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+      
+      if (!LOVABLE_API_KEY) {
+        throw new Error('Document parsing is not configured. Please contact support.');
+      }
+
       try {
         const arrayBuffer = await file.arrayBuffer();
-        const result = await mammoth.extractRawText({ arrayBuffer });
-        extractedText = result.value;
-        console.log('DOCX parsed successfully, extracted', extractedText.length, 'characters');
-      } catch (docxError) {
-        console.error('DOCX parsing error:', docxError);
-        throw new Error('Failed to parse Word document. Please ensure it is a valid DOCX file.');
+        const base64Content = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+        
+        const parseResponse = await fetch('https://ai.gateway.lovable.dev/v1/parse-document', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            file: {
+              name: file.name,
+              content: base64Content,
+              mimeType: file.type,
+            },
+          }),
+        });
+
+        if (!parseResponse.ok) {
+          const errorText = await parseResponse.text();
+          console.error('Document parsing error:', parseResponse.status, errorText);
+          throw new Error(`Failed to parse document: ${parseResponse.status}`);
+        }
+
+        const parseResult = await parseResponse.json();
+        extractedText = parseResult.text || '';
+        console.log('Document parsed successfully, extracted', extractedText.length, 'characters');
+      } catch (parseError) {
+        console.error('Document parsing error:', parseError);
+        throw new Error('Failed to parse document. Please ensure it is a valid PDF or DOCX file.');
       }
     }
     else {
