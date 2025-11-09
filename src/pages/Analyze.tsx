@@ -11,25 +11,27 @@ const Analyze = () => {
   const topRef = useRef<HTMLDivElement>(null);
 
   const handleProfileGenerated = (profile: any) => {
-    // Prepare profile data with additional metadata
+    // Extract all skills and sort by confidence
+    const allSkills = Object.values(profile.categories || {})
+      .flat()
+      .sort((a: any, b: any) => b.confidence - a.confidence);
+
+    // Prepare profile data matching demo format
     const enrichedProfile = {
-      ...profile,
-      name: "User",
+      name: profile.professional_summary?.name || "User",
+      title: profile.professional_summary?.current_role || "Professional",
+      summary: profile.professional_summary?.summary || "Skilled professional with diverse experience.",
       completeness: 85,
-      topSkills: Object.values(profile.categories || {})
-        .flat()
-        .sort((a: any, b: any) => b.confidence - a.confidence)
-        .slice(0, 5),
-      dataSources: [],
+      categories: profile.categories,
+      topSkills: allSkills.slice(0, 8).map((skill: any) => ({
+        name: skill.name,
+        confidence: skill.confidence
+      })),
+      dataSources: profile.dataSources || [],
       recentActivity: [
         { title: "Skills analyzed successfully", date: new Date().toLocaleDateString() }
       ]
     };
-
-    // Add data sources based on what was used
-    if (profile.categories) {
-      enrichedProfile.dataSources.push('cv');
-    }
 
     // Save immediately to localStorage
     localStorage.setItem('skillProfile', JSON.stringify(enrichedProfile));
