@@ -27,60 +27,35 @@ serve(async (req) => {
     console.log('Parsing file:', file.name, 'Size:', file.size);
 
     let extractedText = '';
+    const fileType = file.type || '';
+    const fileName = file.name.toLowerCase();
+
+    console.log('File type:', fileType, 'File name:', fileName);
 
     // Handle text files
-    if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
+    if (fileType === 'text/plain' || fileName.endsWith('.txt')) {
       extractedText = await file.text();
-      console.log('Text file parsed successfully');
+      console.log('Text file parsed successfully, extracted', extractedText.length, 'characters');
     }
-    // For PDF and DOCX files, use the Lovable AI document parsing API
+    // For PDF and DOCX files, inform user to use text input
     else if (
-      file.type === 'application/pdf' || 
-      file.name.endsWith('.pdf') ||
-      file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-      file.name.endsWith('.docx')
+      fileType === 'application/pdf' || 
+      fileName.endsWith('.pdf') ||
+      fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      fileName.endsWith('.docx')
     ) {
-      const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-      
-      if (!LOVABLE_API_KEY) {
-        throw new Error('Document parsing is not configured. Please contact support.');
-      }
-
-      try {
-        const arrayBuffer = await file.arrayBuffer();
-        const base64Content = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-        
-        const parseResponse = await fetch('https://ai.gateway.lovable.dev/v1/parse-document', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            file: {
-              name: file.name,
-              content: base64Content,
-              mimeType: file.type,
-            },
-          }),
-        });
-
-        if (!parseResponse.ok) {
-          const errorText = await parseResponse.text();
-          console.error('Document parsing error:', parseResponse.status, errorText);
-          throw new Error(`Failed to parse document: ${parseResponse.status}`);
-        }
-
-        const parseResult = await parseResponse.json();
-        extractedText = parseResult.text || '';
-        console.log('Document parsed successfully, extracted', extractedText.length, 'characters');
-      } catch (parseError) {
-        console.error('Document parsing error:', parseError);
-        throw new Error('Failed to parse document. Please ensure it is a valid PDF or DOCX file.');
-      }
+      throw new Error(
+        `PDF and DOCX parsing is temporarily unavailable. Please copy and paste your resume text instead. ` +
+        `File: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`
+      );
     }
     else {
-      throw new Error('Unsupported file type. Please upload a PDF, DOCX, or text file.');
+      throw new Error(
+        `Unsupported file type: ${fileType || 'unknown'}. ` +
+        `Supported formats: Plain text (.txt). ` +
+        `For PDF or DOCX files, please copy and paste the text content instead. ` +
+        `File: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`
+      );
     }
 
     if (!extractedText || extractedText.trim().length === 0) {

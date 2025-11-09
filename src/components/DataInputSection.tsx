@@ -212,13 +212,16 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
                   <Input
                     id="cv-file"
                     type="file"
-                    accept=".txt,.pdf,.docx"
+                    accept=".txt"
                     onChange={handleFileUpload}
                     disabled={isProcessing}
                     className="cursor-pointer"
                   />
                   <p className="text-sm text-muted-foreground mt-1">
-                    Upload a PDF, Word document (.docx), or text file (max 10MB)
+                    Upload a plain text file (.txt) with your resume content (max 10MB)
+                  </p>
+                  <p className="text-xs text-warning mt-1">
+                    📝 For PDF or Word documents, please copy the text and paste it below instead
                   </p>
                 </div>
               </div>
