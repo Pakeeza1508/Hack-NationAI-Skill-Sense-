@@ -20,6 +20,11 @@ In a world shifting from credential-based hiring to skills-based talent manageme
 
 ✅ Hallucination Removal & Validation: Manually review, edit, confirm, or reject AI-identified skills to ensure your profile is 100% accurate and reflects your true expertise.
 
+## 🏗️ System Architecture
+
+![SkillSense System Architecture & Data Flow]## 🏗️ System Architecture
+
+![SkillSense System Architecture & Data Flow](https://raw.githubusercontent.com/Pakeeza1508/Hack-NationAI-Skill-Sense-/main/assets/image.png)
 # 🚀 Getting Started
 
 Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
