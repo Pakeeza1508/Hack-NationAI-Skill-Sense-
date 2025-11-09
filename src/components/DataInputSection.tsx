@@ -15,6 +15,8 @@ interface DataInputSectionProps {
 export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) => {
   const [cvText, setCvText] = useState("");
   const [cvFile, setCvFile] = useState<File | null>(null);
+  const [githubUsername, setGithubUsername] = useState("");
+  const [linkedinUrl, setLinkedinUrl] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   
   const { toast } = useToast();
@@ -78,10 +80,10 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
 
 
   const handleAnalyze = async () => {
-    if (!cvText) {
+    if (!cvText && !githubUsername && !linkedinUrl) {
       toast({
-        title: "CV Required",
-        description: "Please provide your CV or resume text.",
+        title: "Input Required",
+        description: "Please provide at least one data source (CV, GitHub, or LinkedIn).",
         variant: "destructive",
       });
       return;
@@ -90,15 +92,79 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
     setIsProcessing(true);
     
     try {
+      let githubData = null;
+      let linkedinData = null;
+      const dataSources: string[] = [];
+
+      // Fetch GitHub data if username provided
+      if (githubUsername) {
+        try {
+          const { data: ghData, error: ghError } = await supabase.functions.invoke('fetch-github', {
+            body: { username: githubUsername },
+          });
+          
+          if (ghError) {
+            console.error('GitHub fetch error:', ghError);
+            toast({
+              title: "GitHub Data Unavailable",
+              description: "Could not fetch GitHub data. Continuing with other sources.",
+              variant: "default",
+            });
+          } else {
+            githubData = ghData;
+            dataSources.push('github');
+          }
+        } catch (err) {
+          console.error('GitHub error:', err);
+        }
+      }
+
+      // Fetch LinkedIn data if URL provided
+      if (linkedinUrl) {
+        try {
+          const { data: liData, error: liError } = await supabase.functions.invoke('scrape-linkedin', {
+            body: { linkedinUrl },
+          });
+          
+          if (liError) {
+            console.error('LinkedIn fetch error:', liError);
+            toast({
+              title: "LinkedIn Data Unavailable",
+              description: "LinkedIn scraping is currently not supported by our data provider. We're working on alternative solutions.",
+              variant: "default",
+            });
+          } else {
+            linkedinData = liData;
+            dataSources.push('linkedin');
+          }
+        } catch (err) {
+          console.error('LinkedIn error:', err);
+        }
+      }
+
+      if (cvText) {
+        dataSources.push('cv');
+      }
+
+      // Extract skills from all available sources
       const { data, error } = await supabase.functions.invoke('extract-skills', {
-        body: { cvText },
+        body: { 
+          cvText,
+          githubData,
+          linkedinData
+        },
       });
 
       if (error) throw error;
 
       const enrichedData = {
         ...data,
-        dataSources: ['cv'],
+        dataSources,
+        sources: {
+          cv: cvText ? true : false,
+          github: githubData ? githubUsername : null,
+          linkedin: linkedinData ? linkedinUrl : null,
+        }
       };
 
       localStorage.setItem('skillProfile', JSON.stringify(enrichedData));
@@ -106,7 +172,7 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
       
       toast({
         title: "Analysis Complete!",
-        description: "Your skill profile has been generated.",
+        description: `Your skill profile has been generated from ${dataSources.length} source(s).`,
       });
 
     } catch (error: any) {
@@ -125,9 +191,9 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
     <section className="py-20">
       <div className="container mx-auto px-4 max-w-3xl">
         <div className="text-center mb-8">
-          <h2 className="text-4xl font-bold mb-3">Skill Analysis</h2>
+          <h2 className="text-4xl font-bold mb-3">Multi-Source Skill Analysis</h2>
           <p className="text-lg text-muted-foreground">
-            Upload your CV to analyze your skills
+            Aggregate data from CV, GitHub, and LinkedIn to discover your complete skill profile
           </p>
         </div>
 
@@ -167,21 +233,57 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
               />
             </div>
 
+            <div>
+              <Label htmlFor="github-username" className="text-base font-semibold">
+                GitHub Username
+              </Label>
+              <Input
+                id="github-username"
+                type="text"
+                placeholder="e.g., octocat"
+                value={githubUsername}
+                onChange={(e) => setGithubUsername(e.target.value)}
+                disabled={isProcessing}
+                className="mt-2"
+              />
+              <p className="text-sm text-muted-foreground mt-1">
+                Analyze your repositories and contributions
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="linkedin-url" className="text-base font-semibold">
+                LinkedIn Profile URL
+              </Label>
+              <Input
+                id="linkedin-url"
+                type="url"
+                placeholder="https://www.linkedin.com/in/yourprofile"
+                value={linkedinUrl}
+                onChange={(e) => setLinkedinUrl(e.target.value)}
+                disabled={isProcessing}
+                className="mt-2"
+              />
+              <p className="text-sm text-muted-foreground mt-1">
+                Extract skills from your professional experience (currently limited support)
+              </p>
+            </div>
+
             <Button
               onClick={handleAnalyze}
-              disabled={isProcessing || !cvText}
+              disabled={isProcessing || (!cvText && !githubUsername && !linkedinUrl)}
               className="w-full text-lg py-6"
               size="lg"
             >
               {isProcessing ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Analyzing CV...
+                  Analyzing Multi-Source Data...
                 </>
               ) : (
                 <>
                   <Upload className="mr-2 h-5 w-5" />
-                  Analyze Skills
+                  Analyze Skills from All Sources
                 </>
               )}
             </Button>
