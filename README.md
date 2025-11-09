@@ -1,5 +1,7 @@
 ## SkillSense: AI-Powered Skill Discovery Platform
 
+**[➡️ View Live Demo](latent-glow.lovable.app/)**
+
 SkillSense is an AI-powered application designed to revolutionize how professionals discover, validate, and articulate their skills. Our mission is to empower you to translate your entire career history into a clear, evidence-based skill profile, helping you navigate your career path with confidence.
 
 In a world shifting from credential-based hiring to skills-based talent management, SkillSense addresses a critical gap: many valuable skills acquired through projects, mentorship, and informal learning go unnoticed. Our platform aggregates data from multiple sources to uncover both explicit and implicit expertise, providing actionable insights for career growth.
