@@ -2,21 +2,6 @@
 
 **[➡️ View Live Demo](https://latent-glow.lovable.app/)**
 
-## 📂 Project Structure
-
-    ├── /src/                
-    │   ├── /components/     
-    │   ├── /pages/         
-    │   ├── /integrations/
-    │   └── App.tsx         
-    │
-    ├── /supabase/          
-    │   ├── /functions/     
-    │   │   ├── /extract-skills/
-    │   │   └── /analyze-gap/
-    │   └── /migrations/   
-    │
-    └── README.md
 
 SkillSense is an AI-powered application designed to revolutionize how professionals discover, validate, and articulate their skills. Our mission is to empower you to translate your entire career history into a clear, evidence-based skill profile, helping you navigate your career path with confidence.
 
