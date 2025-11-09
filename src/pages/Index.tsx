@@ -50,26 +50,28 @@ const Index = () => {
 
       {/* Hero Section */}
       <main>
-        <section className="py-20 md:py-32">
+        <section className="py-20 md:py-32 bg-gradient-to-b from-background to-muted/20">
           <div className="container mx-auto px-4 text-center">
-            <div className="flex justify-center mb-6">
-              <img src={skillSenseLogo} alt="SkillSense" className="h-24 w-24" />
+            <div className="flex justify-center mb-8">
+              <div className="p-6 rounded-3xl bg-card shadow-xl border border-border/50">
+                <img src={skillSenseLogo} alt="SkillSense" className="h-20 w-20" />
+              </div>
             </div>
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
-              Unlock Your <span className="bg-gradient-hero bg-clip-text text-transparent">True Professional Self</span>
+              Unlock Your <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">True Professional Self</span>
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-4 max-w-3xl mx-auto">
+            <p className="text-xl md:text-2xl text-foreground/80 mb-4 max-w-3xl mx-auto font-medium">
               Advanced NLP-Powered Skill Extraction & Analysis Platform
             </p>
-            <p className="text-lg text-muted-foreground mb-8 max-w-4xl mx-auto">
+            <p className="text-base md:text-lg text-muted-foreground mb-10 max-w-4xl mx-auto leading-relaxed">
               Aggregate data from multiple sources, extract explicit and implicit skills using semantic analysis, 
               and generate structured skill profiles with confidence scores and evidence trails.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" onClick={() => navigate('/analyze')} className="text-lg">
+              <Button size="lg" onClick={() => navigate('/analyze')} className="text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all">
                 <Sparkles className="mr-2 h-5 w-5" /> Analyze Your Profile
               </Button>
-              <Button size="lg" variant="outline" onClick={handleViewDemo} className="text-lg">
+              <Button size="lg" variant="outline" onClick={handleViewDemo} className="text-lg px-8 py-6 border-2 hover:bg-accent/10">
                 <FileText className="mr-2 h-5 w-5" /> View Demo
               </Button>
             </div>
