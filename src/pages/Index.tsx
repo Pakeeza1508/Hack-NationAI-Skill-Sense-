@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Brain, FileText, TrendingUp, Sparkles, Target } from "lucide-react";
+import { Brain, FileText, TrendingUp, Sparkles } from "lucide-react";
+import { Header } from "@/components/Header";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -43,23 +44,13 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground animate-fade-in">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Brain className="w-8 h-8 text-primary" />
-            <span className="font-heading font-bold text-xl">SkillSense</span>
-          </div>
-          <Button onClick={() => navigate('/dashboard')}>Go to Dashboard</Button>
-        </div>
-      </header>
+      <Header />
 
       {/* Main Content */}
       <main>
-        {/* Hero Section */}
         <section className="py-20 md:py-32">
           <div className="container mx-auto px-4 text-center">
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
               Unlock Your <span className="bg-gradient-hero bg-clip-text text-transparent">True Professional Self</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
