@@ -16,12 +16,15 @@ interface DataInputSectionProps {
 export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) => {
   const [cvText, setCvText] = useState("");
   const [cvFile, setCvFile] = useState<File | null>(null);
-  const [linkedinText, setLinkedinText] = useState("");
+  const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [linkedinData, setLinkedinData] = useState<any>(null);
   const [githubUrl, setGithubUrl] = useState("");
   const [githubData, setGithubData] = useState<any>(null);
   const [showGithubPreview, setShowGithubPreview] = useState(false);
+  const [showLinkedinPreview, setShowLinkedinPreview] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isFetchingData, setIsFetchingData] = useState(false);
+  const [isFetchingGithub, setIsFetchingGithub] = useState(false);
+  const [isFetchingLinkedin, setIsFetchingLinkedin] = useState(false);
   const { toast } = useToast();
 
   const handleFetchGithubData = async () => {
@@ -34,7 +37,7 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
       return;
     }
 
-    setIsFetchingData(true);
+    setIsFetchingGithub(true);
     try {
       const { data: fetchedGithubData, error: githubError } = await supabase.functions.invoke('fetch-github', {
         body: { githubUrl },
@@ -57,7 +60,44 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
         variant: "destructive",
       });
     } finally {
-      setIsFetchingData(false);
+      setIsFetchingGithub(false);
+    }
+  };
+
+  const handleFetchLinkedinData = async () => {
+    if (!linkedinUrl) {
+      toast({
+        title: "LinkedIn URL Required",
+        description: "Please enter a LinkedIn profile URL first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsFetchingLinkedin(true);
+    try {
+      const { data: fetchedLinkedinData, error: linkedinError } = await supabase.functions.invoke('scrape-linkedin', {
+        body: { linkedinUrl },
+      });
+
+      if (linkedinError) throw linkedinError;
+      
+      setLinkedinData(fetchedLinkedinData);
+      setShowLinkedinPreview(true);
+      
+      toast({
+        title: "LinkedIn Data Fetched",
+        description: "Successfully retrieved LinkedIn profile and posts.",
+      });
+    } catch (error: any) {
+      console.error("LinkedIn fetch error:", error);
+      toast({
+        title: "Failed to Fetch LinkedIn Data",
+        description: error.message || "Could not retrieve LinkedIn data. Please check the URL.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsFetchingLinkedin(false);
     }
   };
 
@@ -121,7 +161,7 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
   };
 
   const handleAnalyze = async () => {
-    if (!cvText && !linkedinText && !githubUrl) {
+    if (!cvText && !linkedinUrl && !githubUrl) {
       toast({
         title: "Input Required",
         description: "Please provide at least one data source to analyze.",
@@ -147,6 +187,7 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
       }
 
       let githubInfo = githubData;
+      let linkedinInfo = linkedinData;
 
       // Fetch GitHub data if URL is provided and not already fetched
       if (githubUrl && !githubData) {
@@ -164,11 +205,28 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
         }
       }
 
-      // Extract skills using AI
+      // Fetch LinkedIn data if URL is provided and not already fetched
+      if (linkedinUrl && !linkedinData) {
+        try {
+          const { data: fetchedLinkedinData, error: linkedinError } = await supabase.functions.invoke('scrape-linkedin', {
+            body: { linkedinUrl },
+          });
+
+          if (!linkedinError) {
+            linkedinInfo = fetchedLinkedinData;
+            setLinkedinData(fetchedLinkedinData);
+          }
+        } catch (error) {
+          console.warn("LinkedIn fetch warning:", error);
+        }
+      }
+
+      // Extract skills using AI with detailed sentiment analysis
       const { data, error } = await supabase.functions.invoke('extract-skills', {
         body: {
           cvText,
-          linkedinText,
+          linkedinUrl,
+          linkedinData: linkedinInfo,
           githubUrl,
           githubData: githubInfo,
         },
@@ -179,7 +237,7 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
       // Add data sources metadata
       const dataSources = [];
       if (cvText || cvFile) dataSources.push('cv');
-      if (linkedinText) dataSources.push('linkedin');
+      if (linkedinUrl) dataSources.push('linkedin');
       if (githubUrl) dataSources.push('github');
 
       const enrichedData = {
@@ -308,20 +366,47 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
               </div>
 
               <div>
-                <Label htmlFor="linkedin-text" className="text-base font-semibold">
-                  LinkedIn Profile Information (Optional)
+                <Label htmlFor="linkedin-url" className="text-base font-semibold">
+                  LinkedIn Profile URL (Optional)
                 </Label>
-                <Textarea
-                  id="linkedin-text"
-                  placeholder="Paste your LinkedIn profile content here (headline, about, experience, skills, etc.)..."
-                  value={linkedinText}
-                  onChange={(e) => setLinkedinText(e.target.value)}
-                  className="mt-2 min-h-[150px]"
-                />
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    id="linkedin-url"
+                    type="url"
+                    placeholder="https://www.linkedin.com/in/yourprofile"
+                    value={linkedinUrl}
+                    onChange={(e) => setLinkedinUrl(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleFetchLinkedinData}
+                    disabled={isFetchingLinkedin || !linkedinUrl}
+                  >
+                    {isFetchingLinkedin ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Copy and paste your profile information from LinkedIn to enhance your skill analysis
+                  Enter your LinkedIn profile URL to analyze your posts, experience, and skills
                 </p>
               </div>
+
+              {/* LinkedIn Preview */}
+              {showLinkedinPreview && linkedinData && (
+                <Card className="p-4 bg-muted/50">
+                  <h4 className="font-semibold mb-2">LinkedIn Data Preview</h4>
+                  <div className="text-sm space-y-1">
+                    <p><strong>Profile:</strong> {linkedinData.headline || 'N/A'}</p>
+                    <p><strong>Posts Found:</strong> {linkedinData.posts?.length || 0}</p>
+                    <p><strong>Experience Entries:</strong> {linkedinData.experience?.length || 0}</p>
+                  </div>
+                </Card>
+              )}
 
               <div>
                 <Label htmlFor="github-url" className="text-base font-semibold">
@@ -340,9 +425,9 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
                     type="button"
                     variant="outline"
                     onClick={handleFetchGithubData}
-                    disabled={isFetchingData || !githubUrl}
+                    disabled={isFetchingGithub || !githubUrl}
                   >
-                    {isFetchingData ? (
+                    {isFetchingGithub ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <Eye className="h-4 w-4" />

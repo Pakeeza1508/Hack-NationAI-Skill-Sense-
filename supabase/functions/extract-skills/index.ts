@@ -54,15 +54,88 @@ serve(async (req) => {
   }
 
   try {
-    const { cvText, linkedinText, githubUrl, githubData } = await req.json();
+    const { cvText, linkedinUrl, linkedinData, githubUrl, githubData } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    // Build the prompt for skill extraction
-    const prompt = buildExtractionPrompt(cvText, linkedinText, githubUrl, githubData);
+    // Build comprehensive context from all available sources
+    let contextText = '';
+    
+    if (cvText) {
+      contextText += `CV/Resume Content:\n${cvText}\n\n`;
+    }
+    
+    if (linkedinUrl) {
+      contextText += `LinkedIn Profile URL: ${linkedinUrl}\n`;
+      if (linkedinData) {
+        contextText += `LinkedIn Profile Data:\n`;
+        contextText += `- Headline: ${linkedinData.headline || 'N/A'}\n`;
+        contextText += `- About: ${linkedinData.about || 'N/A'}\n`;
+        
+        if (linkedinData.experience && linkedinData.experience.length > 0) {
+          contextText += `- Experience:\n${JSON.stringify(linkedinData.experience, null, 2)}\n`;
+        }
+        
+        if (linkedinData.skills && linkedinData.skills.length > 0) {
+          contextText += `- Skills Listed: ${linkedinData.skills.join(', ')}\n`;
+        }
+        
+        if (linkedinData.posts && linkedinData.posts.length > 0) {
+          contextText += `- LinkedIn Posts (${linkedinData.posts.length} posts):\n`;
+          linkedinData.posts.forEach((post: any, idx: number) => {
+            contextText += `  Post ${idx + 1}: ${post.content || post.text}\n`;
+          });
+        }
+        
+        contextText += '\n';
+      }
+    }
+    
+    if (githubUrl) {
+      contextText += `GitHub Profile: ${githubUrl}\n`;
+      if (githubData) {
+        contextText += `GitHub Data: ${JSON.stringify(githubData, null, 2)}\n`;
+      }
+    }
+
+    const prompt = `You are an expert career analyst, skill extraction specialist, and sentiment analysis expert. Analyze the following professional data with deep sentiment analysis to extract a comprehensive skill profile.
+
+${contextText}
+
+CRITICAL INSTRUCTIONS FOR COMPREHENSIVE ANALYSIS:
+
+1. MULTI-SOURCE ANALYSIS:
+   - Extract ALL skills from CV, LinkedIn profile data, LinkedIn posts, and GitHub repositories
+   - Cross-reference skills across sources to increase confidence scores
+   - Weight evidence from multiple sources more heavily
+
+2. SENTIMENT ANALYSIS ON LINKEDIN POSTS:
+   - Analyze the tone, passion, and expertise demonstrated in LinkedIn posts
+   - Extract implicit skills from the topics they write about and how they discuss them
+   - Identify thought leadership areas and domain expertise from post content
+   - Detect enthusiasm and expertise levels from writing style
+
+3. FOR EACH SKILL:
+   - confidence (0-100): Higher if mentioned in multiple sources or demonstrated through posts/projects
+   - type: "explicit" (directly mentioned) or "implicit" (inferred from posts, projects, context)
+   - evidence: Specific quotes or references from CV, LinkedIn posts, or GitHub projects
+   - sentiment: If derived from posts, note the passion/expertise level detected
+
+4. SKILL CATEGORIZATION:
+   - Technical, Soft Skills, Domain Knowledge, Tools & Technologies, Languages, Thought Leadership
+
+5. PROFESSIONAL SUMMARY:
+   - Generate 2-3 sentences highlighting key strengths
+   - Incorporate insights from LinkedIn posts about their expertise areas and interests
+
+6. SFIA FRAMEWORK MAPPING:
+   - Map every extracted skill to SFIA (Skills Framework for the Information Age) category
+   - Assign proficiency level (1-7) with justification based on evidence depth
+
+Return a JSON object matching the expected schema.`;
 
     console.log('Extracting skills using Lovable AI...');
 
@@ -124,55 +197,3 @@ serve(async (req) => {
   }
 });
 
-function buildExtractionPrompt(cvText: string, linkedinText: string, githubUrl: string, githubData?: any): string {
-  let prompt = 'EXTRACT ALL SKILLS FROM ALL DOMAINS - not just programming. Analyze career data comprehensively:\n\n';
-  
-  if (cvText) {
-    prompt += `CV/RESUME CONTENT (extract ALL skills - technical, business, HR, management, finance, etc.):\n${cvText}\n\n`;
-  }
-  
-  if (linkedinText) {
-    prompt += `LINKEDIN PROFILE DATA (look for ALL types of skills - management, HR, business, technical, etc.):\n${linkedinText}\n\n`;
-  }
-  
-  if (githubUrl && githubData) {
-    prompt += `GITHUB PROFILE (source for technical skills evidence):\n`;
-    prompt += `Username: ${githubData.profile.username}\n`;
-    if (githubData.profile.bio) prompt += `Bio: ${githubData.profile.bio}\n`;
-    prompt += `Public Repositories: ${githubData.profile.publicRepos}\n`;
-    prompt += `Total Stars: ${githubData.statistics.totalStars}\n`;
-    prompt += `Total Forks: ${githubData.statistics.totalForks}\n\n`;
-    
-    if (githubData.statistics.topLanguages.length > 0) {
-      prompt += `Programming Languages:\n`;
-      githubData.statistics.topLanguages.forEach((lang: any) => {
-        prompt += `- ${lang.language}: ${lang.repoCount} repos\n`;
-      });
-      prompt += '\n';
-    }
-    
-    if (githubData.statistics.topTopics.length > 0) {
-      prompt += `Repository Topics (indicators of domain expertise):\n`;
-      githubData.statistics.topTopics.forEach((topic: any) => {
-        prompt += `- ${topic.topic} (${topic.count} repos)\n`;
-      });
-      prompt += '\n';
-    }
-    
-    if (githubData.notableRepos.length > 0) {
-      prompt += `Notable Projects (use as evidence with repo names):\n`;
-      githubData.notableRepos.forEach((repo: any) => {
-        prompt += `- ${repo.name}`;
-        if (repo.description) prompt += `: ${repo.description}`;
-        prompt += ` (${repo.language || 'Multiple languages'}, ${repo.stars} stars)\n`;
-      });
-      prompt += '\n';
-    }
-  } else if (githubUrl) {
-    prompt += `GitHub Profile: ${githubUrl}\n(Note: Extract technical skills and use repository names as evidence)\n\n`;
-  }
-  
-  prompt += `IMPORTANT: Extract EVERY skill type - programming, software engineering, data, business, HR, finance, marketing, design, communication, leadership, soft skills, domain expertise. Include specific evidence with source references (CV quotes, GitHub repo names, LinkedIn post/experience titles).`;
-  
-  return prompt;
-}
