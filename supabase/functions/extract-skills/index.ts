@@ -107,33 +107,63 @@ ${contextText}
 
 CRITICAL INSTRUCTIONS FOR COMPREHENSIVE ANALYSIS:
 
-1. MULTI-SOURCE ANALYSIS:
-   - Extract ALL skills from CV, LinkedIn profile data, LinkedIn posts, and GitHub repositories
-   - Cross-reference skills across sources to increase confidence scores
-   - Weight evidence from multiple sources more heavily
+1. MANDATORY MULTI-SOURCE INTEGRATION:
+   - You MUST extract and analyze skills from ALL THREE sources: CV, LinkedIn, AND GitHub
+   - CV provides formal experience and education
+   - LinkedIn provides professional network activity, posts sentiment, and career progression
+   - GitHub provides technical proof through code, project complexity, and collaboration patterns
+   - Cross-reference skills across all three sources to validate and increase confidence scores
+   - A skill mentioned in multiple sources should have 90%+ confidence
 
-2. SENTIMENT ANALYSIS ON LINKEDIN POSTS:
-   - Analyze the tone, passion, and expertise demonstrated in LinkedIn posts
-   - Extract implicit skills from the topics they write about and how they discuss them
-   - Identify thought leadership areas and domain expertise from post content
-   - Detect enthusiasm and expertise levels from writing style
+2. LINKEDIN DEEP SENTIMENT ANALYSIS (REQUIRED):
+   - Analyze EVERY LinkedIn post for tone, passion, expertise, and thought leadership
+   - Extract implicit skills from topics discussed and how they discuss them
+   - Identify domain expertise areas from post content and engagement
+   - Detect enthusiasm levels and teaching ability from writing style
+   - Map posts to skill categories (e.g., posts about "AI ethics" → Domain Knowledge: AI Ethics)
+   - Note professional interests and emerging skill areas from recent posts
 
-3. FOR EACH SKILL:
-   - confidence (0-100): Higher if mentioned in multiple sources or demonstrated through posts/projects
-   - type: "explicit" (directly mentioned) or "implicit" (inferred from posts, projects, context)
-   - evidence: Specific quotes or references from CV, LinkedIn posts, or GitHub projects
-   - sentiment: If derived from posts, note the passion/expertise level detected
+3. GITHUB TECHNICAL VALIDATION (REQUIRED):
+   - Analyze repository languages, frameworks, and technologies used
+   - Evaluate code complexity and architecture patterns
+   - Assess collaboration through PRs, issues, and contributions
+   - Identify DevOps skills from CI/CD configurations
+   - Extract implicit skills from project types (e.g., machine learning projects → ML Engineering)
+   - Consider repository stars, forks, and activity as skill validation signals
 
-4. SKILL CATEGORIZATION:
-   - Technical, Soft Skills, Domain Knowledge, Tools & Technologies, Languages, Thought Leadership
+4. FOR EACH SKILL - MANDATORY MULTI-SOURCE EVIDENCE:
+   - confidence (0-100): 
+     * 50-70% if found in only one source
+     * 70-85% if found in two sources  
+     * 85-100% if found in all three sources with strong evidence
+   - type: "explicit" (directly mentioned in CV/LinkedIn) or "implicit" (inferred from GitHub projects/LinkedIn posts)
+   - evidence: MUST cite specific sources:
+     * CV: "5 years Python experience at Company X"
+     * LinkedIn: "Post from Jan 2024 discussing ML model optimization"
+     * GitHub: "15 repositories using React, 500+ commits"
+   - source_breakdown: { cv: boolean, linkedin: boolean, github: boolean }
+   - sentiment: For LinkedIn-derived skills, note passion/expertise level (high/medium/low)
 
-5. PROFESSIONAL SUMMARY:
+5. SKILL CATEGORIZATION:
+   - Technical (programming, frameworks, tools)
+   - Soft Skills (leadership, communication - inferred from posts and collaboration)
+   - Domain Knowledge (industry expertise from posts and project domains)
+   - Tools & Technologies (from GitHub and CV)
+   - Languages (programming and spoken)
+   - Thought Leadership (from LinkedIn post topics and engagement)
+
+6. PROFESSIONAL SUMMARY (INTEGRATE ALL SOURCES):
    - Generate 2-3 sentences highlighting key strengths
-   - Incorporate insights from LinkedIn posts about their expertise areas and interests
+   - Reference CV achievements, LinkedIn thought leadership, and GitHub technical depth
+   - Example: "Full-stack developer with 5+ years enterprise experience (CV), active contributor to open-source ML projects (GitHub), and recognized thought leader in AI ethics with 10k+ LinkedIn followers (LinkedIn posts)"
 
-6. SFIA FRAMEWORK MAPPING:
-   - Map every extracted skill to SFIA (Skills Framework for the Information Age) category
-   - Assign proficiency level (1-7) with justification based on evidence depth
+7. SFIA FRAMEWORK MAPPING:
+   - Map every extracted skill to SFIA category
+   - Assign proficiency level (1-7) based on:
+     * CV: years of experience and role level
+     * LinkedIn: thought leadership and influence
+     * GitHub: code quality and project complexity
+   - Provide justification citing all three sources where applicable
 
 Return a JSON object matching the expected schema.`;
 

@@ -161,10 +161,29 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
   };
 
   const handleAnalyze = async () => {
-    if (!cvText && !linkedinUrl && !githubUrl) {
+    // Validate required fields
+    if (!cvText) {
       toast({
-        title: "Input Required",
-        description: "Please provide at least one data source to analyze.",
+        title: "CV Required",
+        description: "Please provide your CV or resume text.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!linkedinUrl) {
+      toast({
+        title: "LinkedIn Required",
+        description: "Please provide your LinkedIn profile URL.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!githubUrl) {
+      toast({
+        title: "GitHub Required",
+        description: "Please provide your GitHub profile URL.",
         variant: "destructive",
       });
       return;
@@ -367,7 +386,7 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
 
               <div>
                 <Label htmlFor="linkedin-url" className="text-base font-semibold">
-                  LinkedIn Profile URL (Optional)
+                  LinkedIn Profile URL <span className="text-destructive">*</span>
                 </Label>
                 <div className="flex gap-2 mt-2">
                   <Input
@@ -392,7 +411,7 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
                   </Button>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Enter your LinkedIn profile URL to analyze your posts, experience, and skills
+                  <span className="text-destructive font-semibold">Required:</span> Your LinkedIn posts, experience, and skills will be analyzed for comprehensive skill extraction
                 </p>
               </div>
 
@@ -410,7 +429,7 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
 
               <div>
                 <Label htmlFor="github-url" className="text-base font-semibold">
-                  GitHub Profile URL (Optional)
+                  GitHub Profile URL <span className="text-destructive">*</span>
                 </Label>
                 <div className="flex gap-2 mt-2">
                   <Input
@@ -435,7 +454,7 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
                   </Button>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Click preview to fetch GitHub repository data
+                  <span className="text-destructive font-semibold">Required:</span> Your repositories, languages, and contributions will be analyzed
                 </p>
               </div>
 
