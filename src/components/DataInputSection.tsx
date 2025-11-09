@@ -275,18 +275,6 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
     setIsProcessing(true);
     
     try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      
-      if (authError || !user) {
-        toast({
-          title: "Authentication Required",
-          description: "Please sign in to analyze and save your skill profile.",
-          variant: "destructive",
-        });
-        setIsProcessing(false);
-        return;
-      }
-
       let githubInfo = githubData;
       let linkedinInfo = linkedinData;
 
@@ -372,52 +360,10 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
         }
       };
 
-      // Save profile to database
-      const { data: savedProfile, error: saveError } = await supabase
-        .from('skill_profiles')
-        .insert({
-          user_id: user.id,
-          profile_data: enrichedData,
-          data_sources: dataSources,
-        })
-        .select()
-        .single();
+      // Save to localStorage for now (no authentication required)
+      localStorage.setItem('skillProfile', JSON.stringify(enrichedData));
 
-      if (saveError) throw saveError;
-
-      console.log('Profile saved to Supabase:', savedProfile.id);
-
-      // Generate timeline
-      toast({
-        title: "Generating Timeline",
-        description: "Creating your skill development timeline...",
-      });
-
-      const { data: timelineData, error: timelineError } = await supabase.functions.invoke('generate-timeline', {
-        body: {
-          profileData: enrichedData,
-          userId: user.id,
-        },
-      });
-
-      if (timelineError) {
-        console.error('Timeline generation error:', timelineError);
-      } else if (timelineData?.timeline) {
-        const { error: insertError } = await supabase
-          .from('skill_timeline')
-          .insert(timelineData.timeline);
-
-        if (insertError) {
-          console.error('Timeline insert error:', insertError);
-        } else {
-          console.log(`Inserted ${timelineData.timeline.length} timeline entries`);
-        }
-      }
-
-      onProfileGenerated({
-        ...enrichedData,
-        id: savedProfile.id,
-      });
+      onProfileGenerated(enrichedData);
       
       toast({
         title: "Analysis Complete!",

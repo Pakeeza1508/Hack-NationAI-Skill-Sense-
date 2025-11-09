@@ -25,26 +25,10 @@ const GapAnalysis = () => {
       return;
     }
 
-    const { data: { user } } = await supabase.auth.getUser();
+    // Try to get profile from localStorage first
+    const savedProfile = localStorage.getItem('skillProfile');
     
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to perform gap analysis.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Fetch the actual saved profile from database
-    const { data: profiles, error: profileError } = await supabase
-      .from('skill_profiles')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(1);
-
-    if (profileError || !profiles || profiles.length === 0) {
+    if (!savedProfile) {
       toast({
         title: "No Profile Found",
         description: "Please analyze your skills first before comparing to jobs.",
@@ -53,14 +37,12 @@ const GapAnalysis = () => {
       return;
     }
 
-    const savedProfile = profiles[0].profile_data;
-
     setIsAnalyzing(true);
 
     try {
       const { data, error } = await supabase.functions.invoke('analyze-gap', {
         body: {
-          userProfile: savedProfile,
+          userProfile: JSON.parse(savedProfile),
           jobDescription,
         },
       });
