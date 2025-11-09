@@ -7,6 +7,11 @@ export const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const handleDemoClick = () => {
+    // Navigate to dashboard with a query param to indicate demo mode
+    navigate('/dashboard?demo=true');
+  };
+
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -29,32 +34,24 @@ export const Header = () => {
             Dashboard
           </NavLink>
           <NavLink 
-            to="/skill-profile" 
+            to="/my-profile" 
             className="text-sm font-medium transition-colors hover:text-primary"
             activeClassName="text-primary font-semibold"
           >
             My Profile
           </NavLink>
-          <NavLink 
-            to="/timeline" 
-            className="text-sm font-medium transition-colors hover:text-primary"
-            activeClassName="text-primary font-semibold"
-          >
-            Timeline
-          </NavLink>
-          <NavLink 
-            to="/gap-analysis" 
-            className="text-sm font-medium transition-colors hover:text-primary"
-            activeClassName="text-primary font-semibold"
-          >
-            Skill Gap
-          </NavLink>
         </nav>
 
-        {/* Right: CTA Button */}
-        <Button onClick={() => navigate('/analyze')} variant="default">
-          Analyze Skills
-        </Button>
+        {/* Right: CTA Buttons (conditionally rendered) */}
+        {location.pathname === '/' ? (
+          <Button onClick={handleDemoClick} variant="default">
+            View Demo
+          </Button>
+        ) : (
+          <Button onClick={() => navigate('/analyze')} variant="default">
+            Analyze Skills
+          </Button>
+        )}
       </div>
     </header>
   );

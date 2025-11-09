@@ -85,11 +85,17 @@ const SkillItem = ({ skill }: { skill: any }) => (
     <div className="flex items-start justify-between mb-3">
       <div className="flex-1">
         <h4 className="font-semibold text-lg mb-1">{skill.name}</h4>
-        {skill.type && (
-          <Badge variant="outline" className="mb-2">
-            {skill.type}
-          </Badge>
-        )}
+        <div className="space-x-2 mb-2">
+          {skill.type && (
+            <Badge variant="outline">{skill.type}</Badge>
+          )}
+          {skill.sfia_category && (
+            <Badge variant="secondary">{skill.sfia_category}</Badge>
+          )}
+          {skill.sfia_level && (
+            <Badge variant="secondary">Level {skill.sfia_level}</Badge>
+          )}
+        </div>
       </div>
       <div className="text-right">
         <div className="text-sm text-muted-foreground mb-1">Confidence</div>

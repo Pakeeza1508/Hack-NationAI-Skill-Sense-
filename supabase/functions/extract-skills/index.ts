@@ -1,4 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+// Add this type definition for validated skills
+interface ValidatedSkill {
+  skill_name: string;
+  status: 'approved' | 'rejected';
+}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -7,194 +14,128 @@ const corsHeaders = {
 
 const SYSTEM_PROMPT = `You are an expert career analyst and skill assessment specialist with deep knowledge in technical competencies, professional development, and talent evaluation.
 
-Your task is to perform a comprehensive skill analysis by examining CV/Resume content and GitHub profile data to create a detailed, descriptive skill profile.
+Your task is to perform a comprehensive skill analysis by examining various professional documents to create a detailed, descriptive skill profile. The user will provide a CV, GitHub data, performance reviews, goals, and reference letters.
 
 ANALYSIS OBJECTIVES:
 
-1. **Extract ALL Skills** - Both explicit and implicit:
-   - Explicit: Directly mentioned skills (e.g., "Python", "Project Management")
-   - Implicit: Inferred from context (e.g., leading a team → Leadership, debugging complex systems → Problem-solving)
+1.  **Extract ALL Skills (Explicit & Implicit):** Identify skills directly mentioned and infer skills from project descriptions, roles, and accomplishments.
+2.  **Provide Rich, Evidence-Based Context:** For each skill, explain HOW and WHERE it's demonstrated, assess the proficiency, and justify your reasoning with quotes or data points.
+3.  **Cross-Reference and Synthesize:** Aggregate findings from all provided sources (CV, GitHub, reviews, etc.) to form a holistic view.
+4.  **Categorize Comprehensively:** Group skills into logical categories like Technical, Domain Knowledge, Soft Skills, and Professional Skills.
+5.  **Map to SFIA Framework:** Where possible, assign a relevant SFIA category and proficiency level (1-7) to each skill.
 
-2. **Provide Rich Context** - For each skill, explain:
-   - HOW the skill is demonstrated
-   - WHERE it appears in the data
-   - WHAT level of proficiency is indicated
-   - WHY this assessment is justified
+USER FEEDBACK (VERY IMPORTANT):
+- If the user provides feedback on previously approved or rejected skills, YOU MUST RESPECT IT.
+- **Approved skills** should be included with high confidence.
+- **Rejected skills** should be omitted or addressed as a potential misinterpretation.
 
-3. **Cross-Reference Sources**:
-   - CV provides: Work history, explicit mentions, certifications
-   - GitHub provides: Technical evidence, coding patterns, collaboration
+RESPONSE FORMAT (Strict JSON Object):
 
-4. **Categorize Comprehensively**:
-   - **Technical Skills**: Programming languages, frameworks, tools, databases, DevOps
-   - **Domain Knowledge**: Industry-specific expertise, business domains
-   - **Soft Skills**: Communication, leadership, teamwork, problem-solving
-   - **Professional Skills**: Project management, agile, documentation, mentoring
-
-RESPONSE FORMAT (Detailed & Descriptive):
+You must return a single, valid JSON object. Do not include any text or markdown formatting before or after the JSON.
 
 {
-  "professional_summary": "3-4 sentence comprehensive summary highlighting the individual's core expertise, experience level, key strengths, and professional trajectory based on all analyzed data",
-  
-  "skill_categories": {
+  "summary": "A 3-4 sentence professional summary highlighting core expertise, experience level, and key strengths based on all data.",
+  "categories": {
     "technical_skills": [
       {
-        "skill_name": "Python",
-        "proficiency_level": "Advanced|Intermediate|Beginner|Expert",
-        "confidence_score": 92,
-        "description": "Detailed paragraph explaining how this skill is demonstrated, including specific projects, years of experience, and technical depth shown in the evidence",
+        "name": "Python",
+        "confidence": 95,
+        "type": "explicit|implicit",
         "evidence": [
-          {
-            "source": "CV",
-            "quote": "Specific quote or mention from CV",
-            "context": "Additional context about where and how it was used"
-          },
-          {
-            "source": "GitHub",
-            "detail": "20+ repositories using Python, 1500+ commits, projects include ML pipelines and web APIs",
-            "notable_projects": ["Project A", "Project B"]
-          }
+          "Quote or data point from a source (e.g., 'Led a Python-based data analysis project on the CV')",
+          "Evidence from another source (e.g., 'Maintained two large Python repositories on GitHub')"
         ],
-        "related_skills": ["Django", "Flask", "NumPy", "Pandas"],
-        "years_of_experience": "5+",
-        "last_used": "Current/Recent/2023"
-      }
-    ],
-    "domain_knowledge": [
-      {
-        "domain": "Machine Learning",
-        "expertise_level": "Intermediate",
-        "confidence_score": 85,
-        "description": "Comprehensive explanation of domain expertise with examples",
-        "evidence": [...],
-        "sub_areas": ["Natural Language Processing", "Computer Vision"]
+        "sfia_category": "Programming/Software Development",
+        "sfia_level": 4
       }
     ],
     "soft_skills": [
       {
-        "skill_name": "Leadership",
-        "manifestation": "How this skill is shown",
-        "confidence_score": 78,
-        "description": "Detailed analysis of leadership demonstrations",
-        "evidence": [...]
+        "name": "Team Leadership",
+        "confidence": 88,
+        "type": "implicit",
+        "evidence": [
+          "Inferred from role as 'Team Lead' on CV",
+          "Manager feedback in performance review: 'John effectively led his team to success.'"
+        ],
+        "sfia_category": "Relationship Management",
+        "sfia_level": 5
       }
-    ],
-    "professional_skills": [...]
-  },
-  
-  "key_strengths": [
-    {
-      "strength": "Full-Stack Web Development",
-      "description": "Detailed paragraph explaining this core strength",
-      "supporting_skills": ["React", "Node.js", "PostgreSQL", "REST APIs"],
-      "evidence_summary": "Built 10+ production applications, maintains open-source libraries"
-    }
-  ],
-  
-  "skill_development_timeline": [
-    {
-      "period": "2020-2023",
-      "focus_areas": ["Machine Learning", "Python", "Data Science"],
-      "progression": "Moved from intermediate to advanced based on project complexity"
-    }
-  ],
-  
-  "github_insights": {
-    "most_used_languages": ["JavaScript", "Python", "TypeScript"],
-    "contribution_patterns": "Regular contributor, high commit frequency, collaborative projects",
-    "code_quality_indicators": "Well-documented repositories, follows best practices",
-    "notable_achievements": ["50+ stars on Project X", "Contributor to open-source Library Y"]
-  },
-  
-  "recommendations": {
-    "skill_gaps": ["Areas for potential growth based on current trajectory"],
-    "complementary_skills": ["Skills that would enhance existing capabilities"],
-    "career_paths": ["Suggested career directions based on skill profile"]
+    ]
   }
 }
-
-IMPORTANT GUIDELINES:
-- Be specific and evidence-based in descriptions
-- Provide rich context, not just lists
-- Cross-reference CV and GitHub data for validation
-- Explain your confidence scores
-- Highlight unique or standout capabilities
-- Be realistic about proficiency levels
-- Include both breadth and depth of skills`;
+`;
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    const { cvText, githubData } = await req.json();
-    
+    const { 
+      cvText, 
+      githubData, 
+      performanceReviewText, 
+      goalsObjectivesText, 
+      referenceLettersText, 
+      userId 
+    } = await req.json();
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+    const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY');
+
+    if (!LOVABLE_API_KEY || !SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      throw new Error('Missing critical environment variables');
     }
 
-    // Build comprehensive context
-    let contextText = '=== PROFESSIONAL DATA SOURCES ===\n\n';
-    
-    
-    if (cvText) {
-      contextText += `CV/RESUME CONTENT:\n${cvText}\n\n`;
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let feedbackText = ''
+    if (userId) {
+      try {
+        const { data: validatedSkills, error: validationError } = await supabase
+          .from('validated_skills')
+          .select('skill_name, status')
+          .eq('user_id', userId);
+
+        if (validationError) throw validationError;
+
+        if (validatedSkills && validatedSkills.length > 0) {
+          const skills = validatedSkills as ValidatedSkill[];
+          const approved = skills.filter(s => s.status === 'approved').map(s => s.skill_name);
+          const rejected = skills.filter(s => s.status === 'rejected').map(s => s.skill_name);
+
+          feedbackText = `\
+            --- USER FEEDBACK (HIGHEST PRIORITY) ---\
+            The user has previously APPROVED these skills: ${approved.join(', ') || 'None'}.\
+            The user has previously REJECTED these skills: ${rejected.join(', ') || 'None'}.\
+            Your analysis MUST incorporate this feedback.\
+            ----------------------------------------\
+          `;
+        }
+      } catch (e) {
+        console.error('Error fetching validated skills:', e.message);
+        // Do not block analysis if feedback fails to load
+      }
     }
-    
-    if (githubData) {
-      contextText += `GITHUB PROFILE DATA:\n${JSON.stringify(githubData, null, 2)}\n\n`;
-    }
 
-    const prompt = `Perform a comprehensive skill analysis on the following professional data and generate a detailed, descriptive skill profile.
+    let contextText = ''
+    if (cvText) contextText += `--- CV/RESUME ---\n${cvText}\n\n`;
+    if (githubData) contextText += `--- GITHUB DATA ---\n${JSON.stringify(githubData, null, 2)}\n\n`;
+    if (performanceReviewText) contextText += `--- PERFORMANCE REVIEW ---\n${performanceReviewText}\n\n`;
+    if (goalsObjectivesText) contextText += `--- GOALS & OBJECTIVES ---\n${goalsObjectivesText}\n\n`;
+    if (referenceLettersText) contextText += `--- REFERENCE LETTERS ---\n${referenceLettersText}\n\n`;
 
-${contextText}
+    const userPrompt = `
+      Please perform a comprehensive skill analysis based on the following data. 
+      Adhere strictly to the detailed instructions, objectives, and JSON format specified in the system prompt.
+      
+      ${feedbackText}
 
-ANALYSIS REQUIREMENTS:
-
-1. **Extract ALL Skills** (both explicit and implicit):
-   - From CV: Extract mentioned technologies, roles, responsibilities, achievements
-   - From GitHub: Analyze programming languages, frameworks, project complexity, contribution patterns
-
-2. **Provide Rich, Descriptive Analysis**:
-   - For each skill, write a detailed paragraph explaining HOW it's demonstrated
-   - Include specific evidence from both CV and GitHub
-   - Assess proficiency level based on breadth and depth of usage
-   - Cross-reference sources for validation
-
-3. **Comprehensive Categorization**:
-   - Technical Skills (with sub-categories: languages, frameworks, tools, databases)
-   - Domain Knowledge (industry expertise, specialized areas)
-   - Soft Skills (inferred from projects, roles, collaboration)
-   - Professional Skills (methodologies, practices)
-
-4. **GitHub Deep Analysis**:
-   - Languages used and their frequency
-   - Project types and complexity
-   - Code quality indicators (documentation, structure)
-   - Collaboration evidence (forks, contributions, stars)
-   - Notable achievements or standout projects
-
-5. **Skill Development Timeline**:
-   - Track when skills were acquired/used
-   - Identify progression from beginner to advanced
-   - Note recent vs. older skills
-
-6. **Professional Summary**:
-   - Write 3-4 sentences capturing the overall profile
-   - Highlight key strengths and unique capabilities
-   - Mention experience level and professional trajectory
-
-7. **Actionable Recommendations**:
-   - Identify skill gaps based on current trajectory
-   - Suggest complementary skills
-   - Recommend potential career paths
-
-Return a comprehensive JSON following the detailed schema with rich descriptions and evidence for every finding.`;
-
-    console.log('Extracting skills from multi-source data...');
+      === PROFESSIONAL DATA SOURCES ===
+      ${contextText}
+    `;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -203,34 +144,26 @@ Return a comprehensive JSON following the detailed schema with rich descriptions
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'google/gemini-1.5-flash', // Using a powerful model for complex JSON generation
         messages: [
-          {
-            role: 'system',
-            content: SYSTEM_PROMPT
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: userPrompt }
         ],
         response_format: { type: "json_object" },
+        temperature: 0.2, // Lower temperature for more consistent JSON output
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Lovable AI error:', response.status, errorText);
-      throw new Error(`AI gateway error: ${response.status}`);
+      throw new Error(`AI gateway error: ${response.status} ${errorText}`);
     }
 
     const data = await response.json();
     let content = data.choices[0].message.content;
     
-    // Remove markdown code blocks if present
-    content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    
-    console.log('Multi-source skill extraction completed successfully');
+    // Clean potential markdown wrappers
+    content = content.replace(/^```json\n/, '').replace(/\n```$/, '').trim();
     
     const skillProfile = JSON.parse(content);
 
@@ -239,11 +172,9 @@ Return a comprehensive JSON following the detailed schema with rich descriptions
     });
 
   } catch (error) {
-    console.error('Error in extract-skills function:', error);
+    console.error('Error in extract-skills function:', error.message);
     return new Response(
-      JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Unknown error occurred' 
-      }),
+      JSON.stringify({ error: error.message }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

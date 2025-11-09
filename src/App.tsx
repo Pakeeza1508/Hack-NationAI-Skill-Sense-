@@ -30,7 +30,7 @@ const App = () => (
           
           {/* All other pages with sidebar layout */}
           <Route path="/dashboard" element={<AppLayout><Dashboard /></AppLayout>} />
-          <Route path="/profile" element={<AppLayout><SkillProfile /></AppLayout>} />
+          <Route path="/my-profile" element={<AppLayout><SkillProfile /></AppLayout>} />
           <Route path="/timeline" element={<AppLayout><SkillsTimeline /></AppLayout>} />
           <Route path="/gap-analysis" element={<AppLayout><GapAnalysis /></AppLayout>} />
           <Route path="/settings" element={<AppLayout><Settings /></AppLayout>} />

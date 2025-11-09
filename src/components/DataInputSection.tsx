@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -7,25 +7,37 @@ import { Card } from "@/components/ui/card";
 import { Loader2, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 interface DataInputSectionProps {
   onProfileGenerated: (profile: any) => void;
 }
 
 export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) => {
+  const [user, setUser] = useState<User | null>(null);
   const [cvText, setCvText] = useState("");
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [githubUrl, setGithubUrl] = useState("");
+  const [performanceReviewText, setPerformanceReviewText] = useState("");
+  const [goalsObjectivesText, setGoalsObjectivesText] = useState("");
+  const [referenceLettersText, setReferenceLettersText] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   
   const { toast } = useToast();
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    fetchUser();
+  }, []);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
       toast({
         title: "File Too Large",
         description: "Please upload a file smaller than 10MB.",
@@ -41,12 +53,14 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
       const formData = new FormData();
       formData.append('file', file);
 
+      const { data: { session } } = await supabase.auth.getSession();
+      
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/parse-cv`,
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            'Authorization': `Bearer ${session?.access_token}`,
           },
           body: formData,
         }
@@ -77,12 +91,11 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
     }
   };
 
-
   const handleAnalyze = async () => {
-    if (!cvText && !githubUrl) {
+    if (!cvText && !githubUrl && !performanceReviewText && !goalsObjectivesText && !referenceLettersText) {
       toast({
         title: "Input Required",
-        description: "Please provide at least one data source (CV or GitHub).",
+        description: "Please provide at least one data source.",
         variant: "destructive",
       });
       return;
@@ -94,38 +107,39 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
       let githubData = null;
       const dataSources: string[] = [];
 
-      // Fetch GitHub data if URL provided
       if (githubUrl) {
         try {
           const { data: ghData, error: ghError } = await supabase.functions.invoke('fetch-github', {
             body: { githubUrl },
           });
           
-          if (ghError) {
-            console.error('GitHub fetch error:', ghError);
-            toast({
-              title: "GitHub Data Unavailable",
-              description: "Could not fetch GitHub data. Continuing with other sources.",
-              variant: "default",
-            });
-          } else {
-            githubData = ghData;
-            dataSources.push('github');
-          }
-        } catch (err) {
-          console.error('GitHub error:', err);
+          if (ghError) throw ghError;
+
+          githubData = ghData;
+          dataSources.push('github');
+        } catch (err: any) {
+          console.error('GitHub fetch error:', err);
+          toast({
+            title: "GitHub Data Error",
+            description: "Could not fetch GitHub data. Please check the URL. Continuing with other sources.",
+            variant: "default",
+          });
         }
       }
 
-      if (cvText) {
-        dataSources.push('cv');
-      }
+      if (cvText) dataSources.push('cv');
+      if (performanceReviewText) dataSources.push('performanceReview');
+      if (goalsObjectivesText) dataSources.push('goalsObjectives');
+      if (referenceLettersText) dataSources.push('referenceLetters');
 
-      // Extract skills from all available sources
       const { data, error } = await supabase.functions.invoke('extract-skills', {
         body: { 
           cvText,
-          githubData
+          githubData,
+          performanceReviewText,
+          goalsObjectivesText,
+          referenceLettersText,
+          userId: user?.id,
         },
       });
 
@@ -135,12 +149,11 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
         ...data,
         dataSources,
         sources: {
-          cv: cvText ? true : false,
+          cv: !!cvText,
           github: githubData ? githubUrl : null,
         }
       };
 
-      localStorage.setItem('skillProfile', JSON.stringify(enrichedData));
       onProfileGenerated(enrichedData);
       
       toast({
@@ -152,7 +165,7 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
       console.error("Error analyzing skills:", error);
       toast({
         title: "Analysis Failed",
-        description: error.message || "Failed to analyze your skills. Please try again.",
+        description: error.message || "An unexpected error occurred during analysis. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -166,15 +179,16 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
         <div className="text-center mb-8">
           <h2 className="text-4xl font-bold mb-3">Comprehensive Skill Analysis</h2>
           <p className="text-lg text-muted-foreground">
-            Discover your complete skill profile from CV and GitHub repositories
+            Discover your complete skill profile from CV, GitHub, and other professional documents.
           </p>
         </div>
 
         <Card className="p-8 shadow-card">
           <div className="space-y-6">
+            {/* CV Input */}
             <div>
               <Label htmlFor="cv-file" className="text-base font-semibold">
-                CV / Resume <span className="text-destructive">*</span>
+                CV / Resume
               </Label>
               <div className="mt-2 space-y-2">
                 <Input
@@ -190,9 +204,7 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
                 </p>
               </div>
               <div className="relative my-4">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
+                <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-card px-2 text-muted-foreground">Or paste text</span>
                 </div>
@@ -203,9 +215,11 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
                 value={cvText}
                 onChange={(e) => setCvText(e.target.value)}
                 className="mt-2 min-h-[200px]"
+                disabled={isProcessing}
               />
             </div>
 
+            {/* GitHub Input */}
             <div>
               <Label htmlFor="github-url" className="text-base font-semibold">
                 GitHub Profile URL
@@ -213,33 +227,68 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
               <Input
                 id="github-url"
                 type="url"
-                placeholder="https://github.com/yourusername or just username"
+                placeholder="https://github.com/yourusername"
                 value={githubUrl}
                 onChange={(e) => setGithubUrl(e.target.value)}
                 disabled={isProcessing}
                 className="mt-2"
               />
-              <p className="text-sm text-muted-foreground mt-1">
-                Analyze your repositories and contributions
-              </p>
             </div>
 
+            {/* Internal Documents */}
+            <div>
+              <Label htmlFor="performance-review" className="text-base font-semibold">
+                Performance Review
+              </Label>
+              <Textarea
+                id="performance-review"
+                placeholder="Paste text from your latest performance review..."
+                value={performanceReviewText}
+                onChange={(e) => setPerformanceReviewText(e.target.value)}
+                className="mt-2 min-h-[150px]"
+                disabled={isProcessing}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="goals-objectives" className="text-base font-semibold">
+                Goals & Objectives
+              </Label>
+              <Textarea
+                id="goals-objectives"
+                placeholder="List your current or upcoming goals and objectives..."
+                value={goalsObjectivesText}
+                onChange={(e) => setGoalsObjectivesText(e.target.value)}
+                className="mt-2 min-h-[150px]"
+                disabled={isProcessing}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="reference-letters" className="text-base font-semibold">
+                Reference Letters
+              </Label>
+              <Textarea
+                id="reference-letters"
+                placeholder="Paste content from any reference letters..."
+                value={referenceLettersText}
+                onChange={(e) => setReferenceLettersText(e.target.value)}
+                className="mt-2 min-h-[150px]"
+                disabled={isProcessing}
+              />
+            </div>
+
+            {/* Analyze Button */}
             <Button
               onClick={handleAnalyze}
-              disabled={isProcessing || (!cvText && !githubUrl)}
+              disabled={isProcessing || (!cvText && !githubUrl && !performanceReviewText && !goalsObjectivesText && !referenceLettersText)}
               className="w-full text-lg py-6"
               size="lg"
             >
               {isProcessing ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Analyzing Multi-Source Data...
-                </>
+                <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Analyzing...</>
               ) : (
-                <>
-                  <Upload className="mr-2 h-5 w-5" />
-                  Analyze Skills from All Sources
-                </>
+                <><Upload className="mr-2 h-5 w-5" /> Analyze Skills</>
               )}
             </Button>
           </div>
