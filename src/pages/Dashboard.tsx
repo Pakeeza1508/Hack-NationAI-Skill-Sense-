@@ -5,17 +5,45 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BarChart3, TrendingUp, Target, Sparkles } from "lucide-react";
 import { SkillProfileDisplay } from "@/components/SkillProfileDisplay";
+import { supabase } from "@/integrations/supabase/client";
 
 const Dashboard = () => {
   const [profile, setProfile] = useState<any>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const savedProfile = localStorage.getItem('skillProfile');
-    if (savedProfile) {
-      setProfile(JSON.parse(savedProfile));
-    }
+    loadProfile();
   }, []);
+
+  const loadProfile = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        setProfile(null);
+        return;
+      }
+
+      // Fetch the most recent skill profile from Supabase
+      const { data, error } = await supabase
+        .from('skill_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+        throw error;
+      }
+
+      if (data) {
+        setProfile(data.profile_data);
+      }
+    } catch (error) {
+      console.error('Error loading profile:', error);
+    }
+  };
 
   if (!profile) {
     return (

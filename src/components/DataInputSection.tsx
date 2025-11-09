@@ -133,6 +133,19 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
     setIsProcessing(true);
     
     try {
+      // Check for authenticated user FIRST
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to analyze and save your skill profile.",
+          variant: "destructive",
+        });
+        setIsProcessing(false);
+        return;
+      }
+
       let githubInfo = githubData;
 
       // Fetch GitHub data if URL is provided and not already fetched
@@ -151,6 +164,7 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
         }
       }
 
+      // Extract skills using AI
       const { data, error } = await supabase.functions.invoke('extract-skills', {
         body: {
           cvText,
@@ -173,12 +187,60 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
         dataSources,
       };
 
-      onProfileGenerated(enrichedData);
+      // STEP 1: Save profile to Supabase instead of localStorage
+      const { data: savedProfile, error: saveError } = await supabase
+        .from('skill_profiles')
+        .insert({
+          user_id: user.id,
+          profile_data: enrichedData,
+          data_sources: dataSources,
+        })
+        .select()
+        .single();
+
+      if (saveError) throw saveError;
+
+      console.log('Profile saved to Supabase:', savedProfile.id);
+
+      // STEP 2: Generate timeline from the profile
+      toast({
+        title: "Generating Timeline",
+        description: "Creating your skill development timeline...",
+      });
+
+      const { data: timelineData, error: timelineError } = await supabase.functions.invoke('generate-timeline', {
+        body: {
+          profileData: enrichedData,
+          userId: user.id,
+        },
+      });
+
+      if (timelineError) {
+        console.error('Timeline generation error:', timelineError);
+      } else if (timelineData?.timeline) {
+        // Insert timeline entries into the database
+        const { error: insertError } = await supabase
+          .from('skill_timeline')
+          .insert(timelineData.timeline);
+
+        if (insertError) {
+          console.error('Timeline insert error:', insertError);
+        } else {
+          console.log(`Inserted ${timelineData.timeline.length} timeline entries`);
+        }
+      }
+
+      // Pass the saved profile data to parent component
+      onProfileGenerated({
+        ...enrichedData,
+        id: savedProfile.id,
+      });
       
       toast({
         title: "Analysis Complete!",
-        description: "Your skill profile has been generated successfully.",
+        description: "Your skill profile has been generated and saved successfully.",
       });
+
     } catch (error: any) {
       console.error("Error analyzing skills:", error);
       toast({

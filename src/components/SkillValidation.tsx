@@ -24,10 +24,11 @@ interface SkillValidationProps {
     evidence?: string[];
     type?: string;
   };
+  profileId?: string; // Optional: ID of the skill profile being validated
   onValidated?: () => void;
 }
 
-export const SkillValidation = ({ skill, onValidated }: SkillValidationProps) => {
+export const SkillValidation = ({ skill, profileId, onValidated }: SkillValidationProps) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editedConfidence, setEditedConfidence] = useState(skill.confidence);
   const [editedEvidence, setEditedEvidence] = useState(skill.evidence?.join('\n') || '');
@@ -49,7 +50,7 @@ export const SkillValidation = ({ skill, onValidated }: SkillValidationProps) =>
         return;
       }
 
-      const validationData = {
+      const validationData: any = {
         user_id: user.id,
         skill_name: skill.name,
         category: skill.category,
@@ -60,6 +61,11 @@ export const SkillValidation = ({ skill, onValidated }: SkillValidationProps) =>
         edited_evidence: status === 'edited' ? editedEvidence.split('\n').filter(e => e.trim()) : null,
         user_feedback: feedback || null,
       };
+
+      // STEP 4: Add profile ID if provided
+      if (profileId) {
+        validationData.edited_profile_id = profileId;
+      }
 
       const { error } = await supabase
         .from('validated_skills')

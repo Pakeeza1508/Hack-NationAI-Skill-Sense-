@@ -29,16 +29,11 @@ const SkillsTimeline = () => {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        // Load from localStorage if not authenticated
-        const savedProfile = localStorage.getItem('skillProfile');
-        if (savedProfile) {
-          const profile = JSON.parse(savedProfile);
-          generateMockTimeline(profile);
-        }
         setIsLoading(false);
         return;
       }
 
+      // Fetch timeline data directly from the database (populated by generate-timeline)
       const { data, error } = await supabase
         .from('skill_timeline')
         .select('*')
@@ -61,46 +56,6 @@ const SkillsTimeline = () => {
     }
   };
 
-  const generateMockTimeline = (profile: any) => {
-    // Generate mock timeline data from existing profile
-    const currentDate = new Date();
-    const mockData: TimelineSkill[] = [];
-
-    Object.entries(profile.categories || {}).forEach(([category, skills]: [string, any]) => {
-      skills.forEach((skill: any) => {
-        // Create realistic date ranges (skills discovered 1-5 years ago)
-        const yearsAgo = Math.floor(Math.random() * 5) + 1;
-        const firstDate = new Date(currentDate);
-        firstDate.setFullYear(firstDate.getFullYear() - yearsAgo);
-        
-        mockData.push({
-          skill_name: skill.name,
-          category,
-          first_observed_date: firstDate.toISOString().split('T')[0],
-          last_observed_date: currentDate.toISOString().split('T')[0],
-          milestones: [
-            {
-              date: firstDate.toISOString().split('T')[0],
-              source: 'CV',
-              description: `First mention in professional experience`
-            },
-            {
-              date: new Date(firstDate.setFullYear(firstDate.getFullYear() + Math.floor(yearsAgo / 2))).toISOString().split('T')[0],
-              source: 'GitHub',
-              description: `Used in project repositories`
-            },
-            {
-              date: currentDate.toISOString().split('T')[0],
-              source: 'LinkedIn',
-              description: `Currently listed as key skill`
-            }
-          ]
-        });
-      });
-    });
-
-    setTimelineData(mockData);
-  };
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {

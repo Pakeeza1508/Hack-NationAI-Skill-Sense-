@@ -21,6 +21,7 @@ import {
 import { Download, Filter, FileText, Linkedin, Github, Search, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SkillValidation } from "@/components/SkillValidation";
+import { supabase } from "@/integrations/supabase/client";
 
 const SkillProfile = () => {
   const [profile, setProfile] = useState<any>(null);
@@ -32,19 +33,48 @@ const SkillProfile = () => {
   const [showEvidenceDialog, setShowEvidenceDialog] = useState(false);
 
   useEffect(() => {
-    const savedProfile = localStorage.getItem('skillProfile');
-    if (savedProfile) {
-      const parsed = JSON.parse(savedProfile);
-      setProfile(parsed);
-      
-      // Flatten all skills from categories
-      const allSkills = Object.entries(parsed.categories || {}).flatMap(
-        ([category, skills]: [string, any]) =>
-          skills.map((skill: any) => ({ ...skill, category }))
-      );
-      setFilteredSkills(allSkills);
-    }
+    loadProfile();
   }, []);
+
+  const loadProfile = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        setProfile(null);
+        return;
+      }
+
+      // Fetch the most recent skill profile from Supabase
+      const { data, error } = await supabase
+        .from('skill_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
+      if (data) {
+        const parsed = data.profile_data as any;
+        setProfile(parsed);
+        
+        // Flatten all skills from categories
+        if (parsed && parsed.categories) {
+          const allSkills = Object.entries(parsed.categories).flatMap(
+            ([category, skills]: [string, any]) =>
+              skills.map((skill: any) => ({ ...skill, category }))
+          );
+          setFilteredSkills(allSkills);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading profile:', error);
+    }
+  };
 
   useEffect(() => {
     if (!profile?.categories) return;
