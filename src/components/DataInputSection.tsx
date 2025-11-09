@@ -15,7 +15,7 @@ interface DataInputSectionProps {
 export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) => {
   const [cvText, setCvText] = useState("");
   const [cvFile, setCvFile] = useState<File | null>(null);
-  const [githubUsername, setGithubUsername] = useState("");
+  const [githubUrl, setGithubUrl] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   
@@ -80,7 +80,7 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
 
 
   const handleAnalyze = async () => {
-    if (!cvText && !githubUsername && !linkedinUrl) {
+    if (!cvText && !githubUrl && !linkedinUrl) {
       toast({
         title: "Input Required",
         description: "Please provide at least one data source (CV, GitHub, or LinkedIn).",
@@ -96,11 +96,11 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
       let linkedinData = null;
       const dataSources: string[] = [];
 
-      // Fetch GitHub data if username provided
-      if (githubUsername) {
+      // Fetch GitHub data if URL provided
+      if (githubUrl) {
         try {
           const { data: ghData, error: ghError } = await supabase.functions.invoke('fetch-github', {
-            body: { username: githubUsername },
+            body: { githubUrl },
           });
           
           if (ghError) {
@@ -162,7 +162,7 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
         dataSources,
         sources: {
           cv: cvText ? true : false,
-          github: githubData ? githubUsername : null,
+          github: githubData ? githubUrl : null,
           linkedin: linkedinData ? linkedinUrl : null,
         }
       };
@@ -234,15 +234,15 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
             </div>
 
             <div>
-              <Label htmlFor="github-username" className="text-base font-semibold">
-                GitHub Username
+              <Label htmlFor="github-url" className="text-base font-semibold">
+                GitHub Profile URL
               </Label>
               <Input
-                id="github-username"
-                type="text"
-                placeholder="e.g., octocat"
-                value={githubUsername}
-                onChange={(e) => setGithubUsername(e.target.value)}
+                id="github-url"
+                type="url"
+                placeholder="https://github.com/yourusername or just username"
+                value={githubUrl}
+                onChange={(e) => setGithubUrl(e.target.value)}
                 disabled={isProcessing}
                 className="mt-2"
               />
@@ -271,7 +271,7 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
 
             <Button
               onClick={handleAnalyze}
-              disabled={isProcessing || (!cvText && !githubUsername && !linkedinUrl)}
+              disabled={isProcessing || (!cvText && !githubUrl && !linkedinUrl)}
               className="w-full text-lg py-6"
               size="lg"
             >
