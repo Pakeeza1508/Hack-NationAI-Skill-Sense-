@@ -117,13 +117,19 @@ export const DataInputSection = ({ onProfileGenerated }: DataInputSectionProps) 
 
           githubData = ghData;
           dataSources.push('github');
+          console.log('GitHub data fetched successfully:', githubData);
         } catch (err: any) {
           console.error('GitHub fetch error:', err);
+          // Check if it's a rate limit error
+          const isRateLimit = err.message?.includes('rate limit') || err.message?.includes('403');
           toast({
-            title: "GitHub Data Error",
-            description: "Could not fetch GitHub data. Please check the URL. Continuing with other sources.",
+            title: isRateLimit ? "GitHub Rate Limit" : "GitHub Data Error",
+            description: isRateLimit 
+              ? "GitHub API rate limit reached. Continuing with CV data only." 
+              : "Could not fetch GitHub data. Continuing with CV data only.",
             variant: "default",
           });
+          // Continue without GitHub data
         }
       }
 

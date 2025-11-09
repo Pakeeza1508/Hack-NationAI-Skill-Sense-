@@ -46,6 +46,9 @@ serve(async (req) => {
     });
 
     if (!userResponse.ok) {
+      if (userResponse.status === 403) {
+        throw new Error('GitHub API rate limit exceeded. Please try again later or add a GITHUB_TOKEN secret for higher limits.');
+      }
       throw new Error(`GitHub API error: ${userResponse.status}`);
     }
 
